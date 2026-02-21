@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head th:replace="~{template :: head(${file.name})}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{template :: navbar}"></nav>
+
+<main class="container py-4 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <!-- 面包屑 -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/}">首页</a></li>
+                    <li class="breadcrumb-item active" th:text="${file.name}"></li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-truncate" th:text="${file.name}"></h5>
+                    <a th:href="@{/f/{uid}/download(uid=${file.uid})}"
+                       class="btn btn-sm btn-primary ms-2 flex-shrink-0">
+                        <i class="bi bi-download"></i> 下载
+                    </a>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- 文件信息 -->
+                    <div class="row text-muted small mb-3">
+                        <div class="col-auto">
+                            <i class="bi bi-file-earmark"></i>
+                            <span th:text="${file.ext != null ? file.ext.toUpperCase() : '未知'}"></span>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hdd"></i>
+                            <span th:text="${file.sizeText}"></span>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock"></i>
+                            <span th:text="${file.createTimeText}"></span>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-link"></i>
+                            <span th:text="'/f/' + ${file.uid}"></span>
+                        </div>
+                    </div>
+
+                    <!-- ===== 图片预览 ===== -->
+                    <div th:if="${file.fileType == 'image'}" class="text-center">
+                        <img th:src="${file.cloudUrl}" th:alt="${file.name}"
+                             class="img-fluid rounded" style="max-height:600px;">
+                    </div>
+
+                    <!-- ===== 视频预览 ===== -->
+                    <div th:if="${file.fileType == 'video'}" class="ratio ratio-16x9">
+                        <video controls class="rounded">
+                            <source th:src="${file.cloudUrl}">
+                            您的浏览器不支持 HTML5 视频播放。
+                        </video>
+                    </div>
+
+                    <!-- ===== 音频预览 ===== -->
+                    <div th:if="${file.fileType == 'audio'}" class="d-flex justify-content-center py-4">
+                        <audio controls style="width:100%">
+                            <source th:src="${file.cloudUrl}">
+                            您的浏览器不支持 HTML5 音频播放。
+                        </audio>
+                    </div>
+
+                    <!-- ===== PDF 预览 ===== -->
+                    <div th:if="${file.fileType == 'pdf'}">
+                        <iframe th:src="${file.cloudUrl}" class="w-100 border-0 rounded"
+                                style="height:75vh;" title="PDF 预览"></iframe>
+                    </div>
+
+                    <!-- ===== 文档类（使用 Google Docs Viewer） ===== -->
+                    <div th:if="${file.fileType == 'document'}">
+                        <iframe th:src="'https://docs.google.com/gview?url=' + ${file.cloudUrl} + '&embedded=true'"
+                                class="w-100 border-0 rounded" style="height:75vh;" title="文档预览"></iframe>
+                    </div>
+
+                    <!-- ===== 其他文件 ===== -->
+                    <div th:if="${file.fileType == 'other' or file.fileType == 'text'}"
+                         class="text-center py-5 text-muted">
+                        <i class="bi bi-file-earmark-arrow-down display-1"></i>
+                        <p class="mt-3">此文件类型暂不支持在线预览，请点击下载按钮保存到本地。</p>
+                        <a th:href="@{/f/{uid}/download(uid=${file.uid})}" class="btn btn-primary">
+                            <i class="bi bi-download"></i> 下载文件
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{template :: footer}"></footer>
+<div th:replace="~{template :: scripts}"></div>
+</body>
+</html>

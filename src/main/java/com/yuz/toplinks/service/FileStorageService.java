@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,12 @@ public class FileStorageService {
         Path targetLocation = this.uploadDir.resolve(filename);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
         return filename;
+    }
+
+    public void storeWithName(InputStream inputStream, String filename) throws IOException {
+        filename = Paths.get(filename).getFileName().toString();
+        Path targetLocation = this.uploadDir.resolve(filename);
+        Files.copy(inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING);
     }
 
     public List<String> listFiles() throws IOException {
