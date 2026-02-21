@@ -97,7 +97,13 @@ public class CloudflareStorageService {
     }
 
     private String buildPublicUrl(String objectKey) {
-        String base = publicUrl.isBlank() ? "" : publicUrl;
+        if (publicUrl.isBlank()) {
+            // publicUrl must be configured when R2 is enabled; log a warning and return object key as path
+            java.util.logging.Logger.getLogger(getClass().getName())
+                    .warning("cloudflare.r2.public-url is not set; download URLs will be incomplete.");
+            return objectKey;
+        }
+        String base = publicUrl.endsWith("/") ? publicUrl.substring(0, publicUrl.length() - 1) : publicUrl;
         return base + "/" + objectKey;
     }
 }

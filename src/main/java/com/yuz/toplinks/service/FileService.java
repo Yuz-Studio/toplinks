@@ -128,6 +128,7 @@ public class FileService {
     }
 
     private String computeMd5(byte[] data) {
+        // MD5 used only for file deduplication/integrity checking, not for security
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] digest = md.digest(data);
