@@ -34,6 +34,7 @@ public class FileStorageService {
 
     public List<String> listFiles() throws IOException {
         try (Stream<Path> stream = Files.list(this.uploadDir)) {
+
             return stream.map(path -> path.getFileName().toString())
                     .sorted()
                     .collect(Collectors.toList());

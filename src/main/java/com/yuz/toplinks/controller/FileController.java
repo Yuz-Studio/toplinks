@@ -20,8 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 
+import java.util.logging.Logger;
+
+
 @Controller
 public class FileController {
+
+
+    private static final Logger logger = Logger.getLogger(FileController.class.getName());
+
 
     private final FileStorageService fileStorageService;
 
@@ -75,6 +82,15 @@ public class FileController {
                 return ResponseEntity.notFound().build();
             }
         } catch (SecurityException e) {
+
+            logger.warning("Path traversal attempt for filename: " + filename);
+            return ResponseEntity.badRequest().build();
+        } catch (MalformedURLException e) {
+            logger.warning("Malformed URL for filename: " + filename);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
             return ResponseEntity.badRequest().build();
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
