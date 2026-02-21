@@ -91,12 +91,6 @@ public class FileController {
         }
     }
 
-            return ResponseEntity.badRequest().build();
-        } catch (MalformedURLException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
     private String determineContentType(String filename) {
         String lower = filename.toLowerCase();
         if (lower.endsWith(".png")) return "image/png";
