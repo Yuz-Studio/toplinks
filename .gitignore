@@ -1,3 +1,6 @@
 uploads/
 target/
 *.class
+/.project
+/.classpath
+/.settings/
