@@ -3,8 +3,10 @@ package com.yuz.toplinks.controller;
 import com.yuz.toplinks.service.FileStorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -59,10 +62,14 @@ public class FileController {
             Path file = fileStorageService.getFilePath(filename);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() && resource.isReadable()) {
-                String contentType = determineContentType(filename);
+                MediaType contentType = MediaTypeFactory.getMediaType(filename)
+                        .orElse(MediaType.APPLICATION_OCTET_STREAM);
+                String contentDisposition = ContentDisposition.inline()
+                        .filename(filename, StandardCharsets.UTF_8)
+                        .build().toString();
                 return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                        .contentType(contentType)
                         .body(resource);
             } else {
                 return ResponseEntity.notFound().build();
