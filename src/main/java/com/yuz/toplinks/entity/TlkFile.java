@@ -1,5 +1,7 @@
 package com.yuz.toplinks.entity;
 
+import java.util.Set;
+
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import lombok.Data;
@@ -16,7 +18,7 @@ public class TlkFile extends BaseEntity {
 	//文件名称
 	private String name;
 	
-	//文件的真实路径
+	//文件在存储中的对象键（R2 key 或本地路径）
 	private String path;
 	
 	//6位数字或字母组成，唯一不能重复
@@ -36,4 +38,42 @@ public class TlkFile extends BaseEntity {
 	
 	//创建用户的ID
 	private String userId;
+
+	//所属分类ID
+	private String categoryId;
+
+	//Cloudflare R2 公开访问地址
+	private String cloudUrl;
+
+	private static final Set<String> IMAGE_EXTS  = Set.of("jpg","jpeg","png","gif","webp","svg","bmp","ico");
+	private static final Set<String> VIDEO_EXTS  = Set.of("mp4","mkv","avi","mov","webm","flv");
+	private static final Set<String> AUDIO_EXTS  = Set.of("mp3","wav","ogg","flac","aac","m4a");
+	private static final Set<String> TEXT_EXTS   = Set.of("txt","md","log","csv","json","xml");
+	private static final Set<String> DOC_EXTS    = Set.of("doc","docx","xls","xlsx","ppt","pptx");
+
+	/**
+	 * 返回文件类型标识：image / video / audio / pdf / text / document / other
+	 */
+	public String getFileType() {
+		if (ext == null) return "other";
+		String lower = ext.toLowerCase();
+		if (IMAGE_EXTS.contains(lower))  return "image";
+		if (VIDEO_EXTS.contains(lower))  return "video";
+		if (AUDIO_EXTS.contains(lower))  return "audio";
+		if ("pdf".equals(lower))         return "pdf";
+		if (TEXT_EXTS.contains(lower))   return "text";
+		if (DOC_EXTS.contains(lower))    return "document";
+		return "other";
+	}
+
+	/**
+	 * 返回文件大小的可读字符串
+	 */
+	public String getSizeText() {
+		if (size == null || size < 0) return "";
+		if (size < 1024) return size + " B";
+		if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
+		if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
+		return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
+	}
 }

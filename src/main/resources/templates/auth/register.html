@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head th:replace="~{template :: head('注册')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{template :: navbar}"></nav>
+
+<main class="container py-5 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4">
+                        <i class="bi bi-person-plus"></i> 注册
+                    </h4>
+
+                    <div th:if="${errorMsg}" class="alert alert-danger py-2" th:text="${errorMsg}"></div>
+
+                    <form th:action="@{/auth/register}" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">邮箱 <span class="text-danger">*</span></label>
+                            <input type="email" id="email" name="email" class="form-control" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
+                            <input type="password" id="password" name="password" class="form-control"
+                                   minlength="6" required>
+                            <div class="form-text">至少 6 位字符</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nickname" class="form-label">昵称</label>
+                            <input type="text" id="nickname" name="nickname" class="form-control"
+                                   maxlength="50" placeholder="可选">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">注册</button>
+                    </form>
+
+                    <hr class="my-3">
+
+                    <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-google"></i> 使用 Google 账号注册 / 登录
+                    </a>
+
+                    <p class="text-center mt-3 mb-0 text-muted small">
+                        已有账号？<a th:href="@{/auth/login}">立即登录</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{template :: footer}"></footer>
+<div th:replace="~{template :: scripts}"></div>
+</body>
+</html>
