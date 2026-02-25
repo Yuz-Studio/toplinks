@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
         return userMapper.selectOne(new QueryWrapper<SysUser>().eq("email", email));
     }
 
-    @CacheEvict(value = "users", key = "#user.email")
+    @CacheEvict(value = "users", key = "#email")
     public SysUser register(String email, String password, String nickname) {
         if (findByEmail(email) != null) {
             throw new IllegalArgumentException("该邮箱已注册");
