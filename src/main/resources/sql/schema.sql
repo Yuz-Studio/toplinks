@@ -21,17 +21,19 @@ CREATE TABLE IF NOT EXISTS `SYS_USER` (
 
 -- 分类表
 CREATE TABLE IF NOT EXISTS `TLK_CATEGORY` (
-  `id`          VARCHAR(36)  NOT NULL PRIMARY KEY COMMENT '主键 UUID',
-  `name`        VARCHAR(100) NOT NULL              COMMENT '分类名称',
-  `description` VARCHAR(500)                       COMMENT '分类描述',
-  `icon`        VARCHAR(100)                       COMMENT 'Bootstrap icon class，如 bi-image',
-  `sort_order`  INT      DEFAULT 0                 COMMENT '排序权重，越小越靠前',
-  `status`      INT      DEFAULT 1                 COMMENT '状态：1 启用 2 禁用',
-  `deleted`     INT      DEFAULT 0                 COMMENT '软删除',
-  `create_by`   VARCHAR(36)                        COMMENT '创建人',
-  `create_time` DATETIME                           COMMENT '创建时间',
-  `update_by`   VARCHAR(36)                        COMMENT '修改人',
-  `update_time` DATETIME                           COMMENT '修改时间'
+  `id`          VARCHAR(36)   NOT NULL PRIMARY KEY COMMENT '主键 UUID',
+  `name`        VARCHAR(100)  NOT NULL              COMMENT '分类名称',
+  `description` VARCHAR(500)                        COMMENT '分类描述',
+  `icon`        VARCHAR(100)                        COMMENT 'Bootstrap icon class，如 bi-image',
+  `sort_order`  INT       DEFAULT 0                 COMMENT '排序权重，越小越靠前',
+  `status`      TINYINT(1) DEFAULT 1                COMMENT '状态：1 启用 2 禁用',
+  `deleted`     TINYINT(1) DEFAULT 0                COMMENT '软删除：0 正常 1 已删除',
+  `create_by`   VARCHAR(36)                         COMMENT '创建人',
+  `create_time` DATETIME                            COMMENT '创建时间',
+  `update_by`   VARCHAR(36)                         COMMENT '修改人',
+  `update_time` DATETIME                            COMMENT '修改时间',
+  UNIQUE KEY `uk_name` (`name`),
+  KEY `idx_status_sort` (`status`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文件分类表';
 
 -- 文件表
