@@ -89,16 +89,29 @@ public class FileService {
         return fileMapper.selectOne(new QueryWrapper<TlkFile>().eq("uid", uid));
     }
 
-    @Cacheable(value = "filesByCategory", key = "#categoryId ?: 'all'")
-    public List<TlkFile> listByCategory(String categoryId) {
+    public static final int DEFAULT_PAGE_SIZE = 12;
+
+    public List<TlkFile> listByCategory(String categoryId, int page, int pageSize) {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = DEFAULT_PAGE_SIZE;
+        int offset = (page - 1) * pageSize;
         QueryWrapper<TlkFile> qw = new QueryWrapper<TlkFile>()
                 .eq("status", BaseEntity.STATUS_ACTIVE)
                 .orderByDesc("create_time")
-                .last("LIMIT 20");
+                .last("LIMIT " + pageSize + " OFFSET " + offset);
         if (categoryId != null && !categoryId.isBlank()) {
             qw.eq("category_id", categoryId);
         }
         return fileMapper.selectList(qw);
+    }
+
+    public long countByCategory(String categoryId) {
+        QueryWrapper<TlkFile> qw = new QueryWrapper<TlkFile>()
+                .eq("status", BaseEntity.STATUS_ACTIVE);
+        if (categoryId != null && !categoryId.isBlank()) {
+            qw.eq("category_id", categoryId);
+        }
+        return fileMapper.selectCount(qw);
     }
 
     // ---- helpers ----
