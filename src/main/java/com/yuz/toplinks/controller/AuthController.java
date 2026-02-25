@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.yuz.toplinks.config.SecurityConfig;
 import com.yuz.toplinks.service.UserService;
 
 import jakarta.validation.constraints.Email;
@@ -19,9 +20,11 @@ import jakarta.validation.constraints.Size;
 public class AuthController {
 
     private final UserService userService;
+    private final SecurityConfig securityConfig;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, SecurityConfig securityConfig) {
         this.userService = userService;
+        this.securityConfig = securityConfig;
     }
 
     @GetMapping("/login")
@@ -29,11 +32,13 @@ public class AuthController {
         if (error != null) {
             model.addAttribute("errorMsg", "邮箱或密码错误，请重试。");
         }
+        model.addAttribute("googleEnabled", securityConfig.isGoogleOAuthEnabled());
         return "auth/login";
     }
 
     @GetMapping("/register")
-    public String registerPage() {
+    public String registerPage(Model model) {
+        model.addAttribute("googleEnabled", securityConfig.isGoogleOAuthEnabled());
         return "auth/register";
     }
 
