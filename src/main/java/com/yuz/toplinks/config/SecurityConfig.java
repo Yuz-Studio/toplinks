@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .loginPage("/auth/login")
                 .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
+                    .oidcUserService(customOAuth2UserService)
                 )
             )
             .logout(logout -> logout
