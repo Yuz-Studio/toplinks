@@ -86,6 +86,37 @@
             </div>
         </div>
     </div>
+    <!-- 分页 -->
+    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="文件列表分页">
+        <ul class="pagination">
+            <li th:classappend="${currentPage <= 1 ? ' disabled' : ''}" class="page-item">
+                <a class="page-link"
+                   th:href="${selectedCategory != null}
+                       ? @{/(categoryId=${selectedCategory}, page=${currentPage - 1})}
+                       : @{/(page=${currentPage - 1})}"
+                   aria-label="上一页">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage ? ' active' : ''}" class="page-item">
+                <a class="page-link"
+                   th:href="${selectedCategory != null}
+                       ? @{/(categoryId=${selectedCategory}, page=${i})}
+                       : @{/(page=${i})}"
+                   th:text="${i}"></a>
+            </li>
+            <li th:classappend="${currentPage >= totalPages ? ' disabled' : ''}" class="page-item">
+                <a class="page-link"
+                   th:href="${selectedCategory != null}
+                       ? @{/(categoryId=${selectedCategory}, page=${currentPage + 1})}
+                       : @{/(page=${currentPage + 1})}"
+                   aria-label="下一页">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
 </main>
 
