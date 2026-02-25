@@ -24,7 +24,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/f/**", "/auth/**", "/style/**", "/js/**", "/error").permitAll()
+                .requestMatchers("/", "/f/**", "/auth/**", "/style/**", "/js/**", "/error", "/api/shipping/**").permitAll()
                 .requestMatchers("/upload").authenticated()
                 .anyRequest().authenticated()
             )
@@ -42,6 +42,9 @@ public class SecurityConfig {
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )
+            )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**")
             )
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
