@@ -68,6 +68,87 @@ spring.security.oauth2.client.registration.google.scope=openid,profile,email
 
 ---
 
+## Cloudflare R2 存储配置
+
+项目使用 Cloudflare R2 作为文件存储后端。如果未配置 R2 凭证，系统会自动降级到本地文件存储。
+
+### 1. 注册 Cloudflare 账号
+
+1. 打开 [Cloudflare Dashboard](https://dash.cloudflare.com/sign-up)
+2. 使用邮箱注册并完成验证
+3. 登录后进入 Dashboard 首页
+
+### 2. 获取 Account ID
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 在页面右侧或 URL 中找到你的 **Account ID**（格式为 32 位十六进制字符串）
+3. 也可以进入任意域名的 **概述** 页面，在右侧栏找到 **Account ID**
+4. 记录此 ID，后续配置需要使用
+
+### 3. 开通 R2 存储服务
+
+1. 在 Dashboard 左侧菜单中选择 **R2 对象存储**
+2. 首次使用需要同意服务条款并完成开通
+3. R2 提供每月 10 GB 的免费存储额度
+
+### 4. 创建存储桶（Bucket）
+
+1. 进入 **R2 对象存储** 页面，点击 **创建存储桶**
+2. 输入存储桶名称（例如 `toplinks`）
+3. 选择存储桶位置（建议选择离用户最近的区域）
+4. 点击 **创建存储桶** 完成创建
+
+### 5. 生成 R2 API 令牌（Access Key 和 Secret Key）
+
+1. 进入 **R2 对象存储** 页面，点击右上角 **管理 R2 API 令牌**
+2. 点击 **创建 API 令牌**
+3. 填写令牌名称（例如 `toplinks-r2`）
+4. 权限选择 **对象读和写**
+5. 可以选择将令牌限制到特定存储桶（例如只允许访问 `toplinks` 桶）
+6. 点击 **创建 API 令牌**
+7. 创建成功后会显示：
+   - **Access Key ID** — 对应环境变量 `CLOUDFLARE_R2_ACCESS_KEY`
+   - **Secret Access Key** — 对应环境变量 `CLOUDFLARE_R2_SECRET_KEY`
+
+> **⚠️ 重要**：Secret Access Key 只会显示一次，请立即复制保存。如果丢失需要重新创建令牌。
+
+### 6. 配置公开访问（可选）
+
+如果需要通过 URL 直接访问上传的文件：
+
+1. 进入对应的存储桶设置页面
+2. 在 **公开访问** 部分，启用 **R2.dev 子域** 或绑定自定义域名
+3. 启用后会获得一个公开访问 URL，例如：
+   - R2.dev 子域：`https://pub-xxxxxxxxxxxx.r2.dev`
+   - 自定义域名：`https://files.yourdomain.com`
+4. 记录此 URL，用于配置 `CLOUDFLARE_R2_PUBLIC_URL`
+
+### 7. 配置环境变量
+
+将上述获取的信息设置为环境变量：
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID=你的AccountID
+export CLOUDFLARE_R2_ACCESS_KEY=你的AccessKeyID
+export CLOUDFLARE_R2_SECRET_KEY=你的SecretAccessKey
+export CLOUDFLARE_R2_BUCKET=toplinks
+export CLOUDFLARE_R2_PUBLIC_URL=https://你的公开访问域名
+```
+
+应用会通过 `application.properties` 中的以下配置自动读取：
+
+```properties
+cloudflare.r2.account-id=${CLOUDFLARE_ACCOUNT_ID:}
+cloudflare.r2.access-key=${CLOUDFLARE_R2_ACCESS_KEY:}
+cloudflare.r2.secret-key=${CLOUDFLARE_R2_SECRET_KEY:}
+cloudflare.r2.bucket=${CLOUDFLARE_R2_BUCKET:toplinks}
+cloudflare.r2.public-url=${CLOUDFLARE_R2_PUBLIC_URL:}
+```
+
+> **注意**：如果不配置 R2 相关环境变量，应用会自动降级为本地文件存储，上传的文件将保存在服务器的 `uploads` 目录中。
+
+---
+
 ## Running Tests Locally
 
 Make sure you have a MySQL instance running with a database named `toplinks_test`, then:
