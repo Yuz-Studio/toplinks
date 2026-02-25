@@ -2,6 +2,7 @@ package com.yuz.toplinks.config;
 
 import com.yuz.toplinks.service.CustomOAuth2UserService;
 import com.yuz.toplinks.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,6 +15,9 @@ public class SecurityConfig {
 
     private final UserService userService;
     private final CustomOAuth2UserService customOAuth2UserService;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id:disabled}")
+    private String googleClientId;
 
     public SecurityConfig(UserService userService, CustomOAuth2UserService customOAuth2UserService) {
         this.userService = userService;
@@ -35,14 +39,19 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/", true)
                 .failureUrl("/auth/login?error")
                 .permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
+            );
+
+        if (isGoogleOAuthEnabled()) {
+            http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/auth/login")
                 .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .oidcUserService(customOAuth2UserService)
                 )
-            )
+            );
+        }
+
+        http
             .logout(logout -> logout
                 .logoutUrl("/auth/logout")
                 .logoutSuccessUrl("/")
@@ -51,5 +60,11 @@ public class SecurityConfig {
             .userDetailsService(userService);
 
         return http.build();
+    }
+
+    public boolean isGoogleOAuthEnabled() {
+        return googleClientId != null
+                && !googleClientId.isBlank()
+                && !"disabled".equalsIgnoreCase(googleClientId);
     }
 }

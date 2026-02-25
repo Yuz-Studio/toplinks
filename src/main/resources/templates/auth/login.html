@@ -31,12 +31,13 @@
                         <button type="submit" class="btn btn-primary w-100">登录</button>
                     </form>
 
-                    <hr class="my-3">
-
                     <!-- Google 登录 -->
-                    <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger w-100">
-                        <i class="bi bi-google"></i> 使用 Google 账号登录
-                    </a>
+                    <div th:if="${googleEnabled}">
+                        <hr class="my-3">
+                        <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-google"></i> 使用 Google 账号登录
+                        </a>
+                    </div>
 
                     <p class="text-center mt-3 mb-0 text-muted small">
                         还没有账号？<a th:href="@{/auth/register}">立即注册</a>
