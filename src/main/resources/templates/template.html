@@ -38,7 +38,9 @@
                     </a>
                     <span class="text-white-50 small ms-2"
                           th:text="${currentUser != null ? (currentUser.nickname ?: currentUser.email) : ''}"></span>
-                    <a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm ms-2">退出</a>
+                    <form th:action="@{/auth/logout}" method="post" class="d-inline ms-2">
+                        <button type="submit" class="btn btn-outline-light btn-sm">退出</button>
+                    </form>
                 </span>
                 <!-- 未登录 -->
                 <span sec:authorize="!isAuthenticated()">
