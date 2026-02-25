@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yuz.toplinks.entity.BaseEntity;
+import com.yuz.toplinks.entity.TlkCategory;
 import com.yuz.toplinks.entity.TlkFile;
 import com.yuz.toplinks.mapper.TlkFileMapper;
 
@@ -30,10 +31,13 @@ public class FileService {
 
     private final TlkFileMapper fileMapper;
     private final CloudflareStorageService storageService;
+    private final CategoryService categoryService;
 
-    public FileService(TlkFileMapper fileMapper, CloudflareStorageService storageService) {
+    public FileService(TlkFileMapper fileMapper, CloudflareStorageService storageService,
+            CategoryService categoryService) {
         this.fileMapper = fileMapper;
         this.storageService = storageService;
+        this.categoryService = categoryService;
     }
 
     /**
@@ -75,7 +79,8 @@ public class FileService {
         tlkFile.setHash(hash);
         tlkFile.setCloudUrl(cloudUrl);
         tlkFile.setUserId(userId);
-        tlkFile.setCategoryId(categoryId);
+        tlkFile.setCategoryId(categoryId != null && !categoryId.isBlank() ? categoryId
+                : detectCategoryId(ext));
         tlkFile.setCreateIp(ip);
         tlkFile.setStatus(BaseEntity.STATUS_ACTIVE);
         tlkFile.setCreateTime(new Date());
@@ -161,5 +166,46 @@ public class FileService {
             ip = ip.split(",")[0].trim();
         }
         return ip;
+    }
+
+    /**
+     * 根据文件扩展名自动检测并返回对应分类的 ID。
+     * 通过查找 icon 字段与文件类型对应的分类实现自动匹配。
+     *
+     * @param ext 文件扩展名（不含点，小写）
+     * @return 匹配分类的 ID，找不到则返回 null
+     */
+    private String detectCategoryId(String ext) {
+        String fileType = resolveFileType(ext);
+        String icon = fileTypeToIcon(fileType);
+        if (icon == null) return null;
+        TlkCategory category = categoryService.findByIcon(icon);
+        return category != null ? category.getId() : null;
+    }
+
+    /** 根据扩展名返回文件类型标识（复用 TlkFile 中相同的逻辑）。 */
+    private static String resolveFileType(String ext) {
+        if (ext == null || ext.isBlank()) return "other";
+        String lower = ext.toLowerCase();
+        if (TlkFile.IMAGE_EXTS.contains(lower))  return "image";
+        if (TlkFile.VIDEO_EXTS.contains(lower))  return "video";
+        if (TlkFile.AUDIO_EXTS.contains(lower))  return "audio";
+        if ("pdf".equals(lower))                  return "pdf";
+        if (TlkFile.TEXT_EXTS.contains(lower))   return "text";
+        if (TlkFile.DOC_EXTS.contains(lower))    return "document";
+        return "other";
+    }
+
+    /** 将文件类型标识映射到默认的 Bootstrap icon class 名称。 */
+    private static String fileTypeToIcon(String fileType) {
+        return switch (fileType) {
+            case "image"    -> "bi-image";
+            case "video"    -> "bi-play-circle";
+            case "audio"    -> "bi-music-note-beamed";
+            case "pdf"      -> "bi-file-earmark-pdf";
+            case "document" -> "bi-file-earmark-word";
+            case "text"     -> "bi-file-earmark-text";
+            default         -> "bi-file-earmark";
+        };
     }
 }
