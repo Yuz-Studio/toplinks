@@ -1,7 +1,6 @@
 package com.yuz.toplinks.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.springframework.http.HttpHeaders;
@@ -18,10 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.yuz.toplinks.entity.TlkCategory;
 import com.yuz.toplinks.entity.TlkFile;
 import com.yuz.toplinks.entity.SysUser;
-import com.yuz.toplinks.service.CategoryService;
 import com.yuz.toplinks.service.FileService;
 import com.yuz.toplinks.service.UserService;
 
@@ -33,20 +30,16 @@ public class FileController {
     private static final Logger logger = Logger.getLogger(FileController.class.getName());
 
     private final FileService fileService;
-    private final CategoryService categoryService;
     private final UserService userService;
 
-    public FileController(FileService fileService, CategoryService categoryService, UserService userService) {
+    public FileController(FileService fileService, UserService userService) {
         this.fileService = fileService;
-        this.categoryService = categoryService;
         this.userService = userService;
     }
 
     /** 文件上传页面（需要登录） */
     @GetMapping("/upload")
-    public String uploadPage(Model model) {
-        List<TlkCategory> categories = categoryService.listActiveCategories();
-        model.addAttribute("categories", categories);
+    public String uploadPage() {
         return "file/upload";
     }
 
