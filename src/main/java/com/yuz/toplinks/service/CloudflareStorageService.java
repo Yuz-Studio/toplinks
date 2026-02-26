@@ -64,14 +64,22 @@ public class CloudflareStorageService {
      */
     public String upload(String objectKey, InputStream inputStream, long size, String contentType) throws IOException {
         if (r2Enabled) {
+            // Read all bytes into memory so the SDK uses standard (non-chunked) SigV4 signing.
+            // Cloudflare R2 does not support STREAMING-AWS4-HMAC-SHA256-PAYLOAD chunked signing,
+            // which fromInputStream() uses. The caller is responsible for enforcing an upload
+            // size limit (e.g. spring.servlet.multipart.max-file-size) to bound memory usage.
+            if (size < 0) {
+                throw new IOException("Invalid file size: " + size);
+            }
+            byte[] bytes = inputStream.readAllBytes();
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
                             .key(objectKey)
                             .contentType(contentType)
-                            .contentLength(size)
+                            .contentLength((long) bytes.length)
                             .build(),
-                    RequestBody.fromInputStream(inputStream, size));
+                    RequestBody.fromBytes(bytes));
             return buildPublicUrl(objectKey);
         } else {
             // 降级：存储到本地并返回本地访问路径
