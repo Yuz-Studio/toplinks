@@ -76,10 +76,10 @@
                     </p>
                 </div>
                 <div class="card-footer p-2 d-flex gap-1">
-                    <a th:href="@{/f/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                    <a th:href="@{/file/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
                         <i class="bi bi-eye"></i> 查看
                     </a>
-                    <a th:href="@{/f/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
+                    <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
                         <i class="bi bi-download"></i>
                     </a>
                 </div>

@@ -65,9 +65,9 @@ public class FileController {
         try {
             String userId = resolveUserId(authentication);
             TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
-            redirectAttributes.addFlashAttribute("message", "文件上传成功！访问地址：/f/" + tlkFile.getUid());
+            redirectAttributes.addFlashAttribute("message", "文件上传成功！访问地址：/file/" + tlkFile.getUid());
             redirectAttributes.addFlashAttribute("alertClass", "alert-success");
-            return "redirect:/f/" + tlkFile.getUid();
+            return "redirect:/file/" + tlkFile.getUid();
         } catch (IOException e) {
             logger.warning("File upload failed: " + e.getMessage());
             redirectAttributes.addFlashAttribute("message", "上传失败：" + e.getMessage());
@@ -77,7 +77,7 @@ public class FileController {
     }
 
     /** 文件详情页面（公开访问） */
-    @GetMapping("/f/{uid}")
+    @GetMapping("/file/{uid}")
     public String fileDetail(@PathVariable String uid, Model model) {
         TlkFile file = fileService.findByUid(uid);
         if (file == null) {
@@ -92,7 +92,7 @@ public class FileController {
      * 图片类直接重定向到 Cloudflare URL，避免占用服务器带宽。
      * 其他文件同样通过重定向让 Cloudflare 直接传输。
      */
-    @GetMapping("/f/{uid}/download")
+    @GetMapping("/file/{uid}/download")
     public ResponseEntity<Void> downloadFile(@PathVariable String uid) {
         TlkFile file = fileService.findByUid(uid);
         if (file == null) {
