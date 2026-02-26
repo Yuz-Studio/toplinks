@@ -30,9 +30,9 @@
                         </div>
 
                         <div class="mb-4" th:if="${categories != null and not #lists.isEmpty(categories)}">
-                            <label for="categoryId" class="form-label">所属分类</label>
+                            <label for="categoryId" class="form-label">所属分类 <span class="text-muted small">（可选，不选则根据文件类型自动分配）</span></label>
                             <select id="categoryId" name="categoryId" class="form-select">
-                                <option value="">-- 不选择分类 --</option>
+                                <option value="">-- 自动检测 --</option>
                                 <option th:each="cat : ${categories}"
                                         th:value="${cat.id}"
                                         th:text="${cat.name}"></option>

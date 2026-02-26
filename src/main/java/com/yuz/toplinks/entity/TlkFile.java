@@ -45,11 +45,11 @@ public class TlkFile extends BaseEntity {
 	//Cloudflare R2 公开访问地址
 	private String cloudUrl;
 
-	private static final Set<String> IMAGE_EXTS  = Set.of("jpg","jpeg","png","gif","webp","svg","bmp","ico");
-	private static final Set<String> VIDEO_EXTS  = Set.of("mp4","mkv","avi","mov","webm","flv");
-	private static final Set<String> AUDIO_EXTS  = Set.of("mp3","wav","ogg","flac","aac","m4a");
-	private static final Set<String> TEXT_EXTS   = Set.of("txt","md","log","csv","json","xml");
-	private static final Set<String> DOC_EXTS    = Set.of("doc","docx","xls","xlsx","ppt","pptx");
+	public static final Set<String> IMAGE_EXTS  = Set.of("jpg","jpeg","png","gif","webp","svg","bmp","ico");
+	public static final Set<String> VIDEO_EXTS  = Set.of("mp4","mkv","avi","mov","webm","flv");
+	public static final Set<String> AUDIO_EXTS  = Set.of("mp3","wav","ogg","flac","aac","m4a");
+	public static final Set<String> TEXT_EXTS   = Set.of("txt","md","log","csv","json","xml");
+	public static final Set<String> DOC_EXTS    = Set.of("doc","docx","xls","xlsx","ppt","pptx");
 
 	/**
 	 * 返回文件类型标识：image / video / audio / pdf / text / document / other
