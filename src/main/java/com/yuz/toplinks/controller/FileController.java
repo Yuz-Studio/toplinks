@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yuz.toplinks.entity.TlkFile;
 import com.yuz.toplinks.entity.SysUser;
 import com.yuz.toplinks.service.FileService;
+import com.yuz.toplinks.service.FileStorageService;
 import com.yuz.toplinks.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,10 +32,13 @@ public class FileController {
 
     private final FileService fileService;
     private final UserService userService;
+    private final FileStorageService fileStorageService;
 
-    public FileController(FileService fileService, UserService userService) {
+    public FileController(FileService fileService, UserService userService,
+            FileStorageService fileStorageService) {
         this.fileService = fileService;
         this.userService = userService;
+        this.fileStorageService = fileStorageService;
     }
 
     /** 文件上传页面（需要登录） */
@@ -108,8 +112,7 @@ public class FileController {
     @GetMapping("/files/{filename:.+}")
     @org.springframework.web.bind.annotation.ResponseBody
     public ResponseEntity<org.springframework.core.io.Resource> serveLocalFile(
-            @PathVariable String filename,
-            com.yuz.toplinks.service.FileStorageService fileStorageService) {
+            @PathVariable String filename) {
         try {
             java.nio.file.Path filePath = fileStorageService.getFilePath(filename);
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
