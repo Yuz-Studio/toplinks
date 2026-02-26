@@ -22,6 +22,18 @@
 
                     <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
+                            <label for="fileType" class="form-label">文件类型</label>
+                            <select id="fileType" class="form-select">
+                                <option value="">全部类型</option>
+                                <option value="image">图片（jpg、png、gif、webp 等）</option>
+                                <option value="video">视频（mp4、mkv、avi 等）</option>
+                                <option value="audio">音频（mp3、wav、flac 等）</option>
+                                <option value="document">文档（doc、xls、ppt 等）</option>
+                                <option value="pdf">PDF</option>
+                                <option value="text">文本（txt、md、csv 等）</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="file" class="form-label">选择文件 <span class="text-danger">*</span></label>
                             <input type="file" id="file" name="file" class="form-control" required>
                             <div class="form-text">
@@ -52,5 +64,18 @@
 
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>
+<script>
+    const FILE_TYPE_ACCEPT = {
+        image:    'image/*,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico',
+        video:    'video/*,.mp4,.mkv,.avi,.mov,.webm,.flv',
+        audio:    'audio/*,.mp3,.wav,.ogg,.flac,.aac,.m4a',
+        document: '.doc,.docx,.xls,.xlsx,.ppt,.pptx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        pdf:      'application/pdf,.pdf',
+        text:     'text/plain,text/markdown,text/csv,.txt,.md,.log,.csv,.json,.xml'
+    };
+    document.getElementById('fileType').addEventListener('change', function () {
+        document.getElementById('file').accept = FILE_TYPE_ACCEPT[this.value] || '';
+    });
+</script>
 </body>
 </html>
