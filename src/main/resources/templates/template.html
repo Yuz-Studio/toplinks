@@ -12,9 +12,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' - TopLinks'">TopLinks</title>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/css/bootstrap-icons.css}">
-    <link rel="stylesheet" th:href="@{/style/common.css}">
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/static/style/common.css}">
 </head>
 
 <body>
@@ -61,8 +61,8 @@
 
 <!-- ===== 公共脚本 ===== -->
 <div th:fragment="scripts">
-    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/static/js/common.js}"></script>
 </div>
 
 </body>
