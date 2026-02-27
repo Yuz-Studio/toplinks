@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{template :: head('Privacy Policy')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{template :: navbar}"></nav>
+
+<main class="container py-5 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-1"><i class="bi bi-shield-lock"></i> Privacy Policy</h2>
+            <p class="text-muted small mb-4">Last updated: January 2025</p>
+            <p class="lead">Your privacy matters to us. This policy explains what information we collect, how we use it, and your rights.</p>
+            <hr>
+
+            <h5>1. Information We Collect</h5>
+            <p>When you register, we collect your email address and an optional nickname. When you upload files, we store the file content and metadata (name, size, type, upload time) associated with your account.</p>
+
+            <h5>2. How We Use Your Information</h5>
+            <ul>
+                <li>To provide and maintain the TopLinks service</li>
+                <li>To authenticate you when you log in</li>
+                <li>To associate uploaded files with your account</li>
+            </ul>
+
+            <h5>3. File Storage</h5>
+            <p>Uploaded files are stored in Cloudflare R2 object storage. Files that you make publicly accessible via their share link can be accessed by anyone with that link.</p>
+
+            <h5>4. Data Retention</h5>
+            <p>Your account data and files are retained until you request deletion. You may contact us at any time to request removal of your data.</p>
+
+            <h5>5. Third-Party Services</h5>
+            <p>We use Cloudflare R2 for file storage and, optionally, Google OAuth for authentication. These services have their own privacy policies.</p>
+
+            <h5>6. Cookies</h5>
+            <p>We use a session cookie solely to keep you logged in. No tracking or advertising cookies are used.</p>
+
+            <h5>7. Contact</h5>
+            <p>For any privacy-related requests, please contact <a href="mailto:support@toplinks.app">support@toplinks.app</a>.</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{template :: footer}"></footer>
+<div th:replace="~{template :: scripts}"></div>
+</body>
+</html>
