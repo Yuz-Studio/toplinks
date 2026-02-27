@@ -193,6 +193,7 @@ public class FileService {
         if ("pdf".equals(lower))                  return "pdf";
         if (TlkFile.TEXT_EXTS.contains(lower))   return "text";
         if (TlkFile.DOC_EXTS.contains(lower))    return "document";
+        if (TlkFile.MOBI_EXTS.contains(lower))   return "mobi";
         return "other";
     }
 
@@ -205,6 +206,7 @@ public class FileService {
             case "pdf"      -> "bi-file-earmark-pdf";
             case "document" -> "bi-file-earmark-word";
             case "text"     -> "bi-file-earmark-text";
+            case "mobi"     -> "bi-book";
             default         -> "bi-file-earmark";
         };
     }
