@@ -106,7 +106,7 @@
             container.innerHTML =
                 '<div class="text-center py-4">' +
                 '<div class="spinner-border text-secondary" role="status">' +
-                '<span class="visually-hidden">加载中...</span></div></div>';
+                '<span class="visually-hidden">Loading...</span></div></div>';
 
             fetch(url)
                 .then(function (resp) {
@@ -117,7 +117,7 @@
                     var content = parseMobi(buffer);
                     if (content === null) {
                         container.innerHTML =
-                            '<div class="alert alert-warning">此 mobi 文件使用 Huffman 压缩，暂不支持在线预览，请下载后使用 Kindle 阅读。</div>';
+                            '<div class="alert alert-warning">This MOBI file uses Huffman compression and cannot be previewed online. Please download it and open with Kindle.</div>';
                         return;
                     }
                     var isHtml = /<(html|body|div|p|span|h[1-6]|br)/i.test(content);
@@ -139,7 +139,7 @@
                 })
                 .catch(function (err) {
                     container.innerHTML =
-                        '<div class="alert alert-warning">无法预览此 mobi 文件：' + escapeHtml(err.message) + '</div>';
+                        '<div class="alert alert-warning">Unable to preview this MOBI file: ' + escapeHtml(err.message) + '</div>';
                 });
         }
     };

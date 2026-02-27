@@ -30,7 +30,7 @@ public class AuthController {
     @GetMapping("/login")
     public String loginPage(@RequestParam(required = false) String error, Model model) {
         if (error != null) {
-            model.addAttribute("errorMsg", "邮箱或密码错误，请重试。");
+            model.addAttribute("errorMsg", "Incorrect email or password. Please try again.");
         }
         model.addAttribute("googleEnabled", securityConfig.isGoogleOAuthEnabled());
         return "auth/login";
@@ -50,7 +50,7 @@ public class AuthController {
             RedirectAttributes redirectAttributes) {
         try {
             userService.register(email, password, nickname);
-            redirectAttributes.addFlashAttribute("successMsg", "注册成功，请登录！");
+            redirectAttributes.addFlashAttribute("successMsg", "Registration successful. Please log in.");
             return "redirect:/auth/login";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());

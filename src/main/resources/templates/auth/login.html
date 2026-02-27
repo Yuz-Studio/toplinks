@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
-<head th:replace="~{template :: head('登录')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{template :: head('Login')}"></head>
 <body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{template :: navbar}"></nav>
@@ -11,36 +11,33 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h4 class="card-title text-center mb-4">
-                        <i class="bi bi-person-circle"></i> 登录
+                        <i class="bi bi-person-circle"></i> Login
                     </h4>
 
-                    <!-- 错误/成功提示 -->
                     <div th:if="${errorMsg}" class="alert alert-danger py-2" th:text="${errorMsg}"></div>
                     <div th:if="${successMsg}" class="alert alert-success py-2" th:text="${successMsg}"></div>
 
-                    <!-- 邮箱密码登录 -->
                     <form th:action="@{/auth/login}" method="post">
                         <div class="mb-3">
-                            <label for="email" class="form-label">邮箱</label>
+                            <label for="email" class="form-label">Email</label>
                             <input type="email" id="email" name="email" class="form-control" required autofocus>
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">密码</label>
+                            <label for="password" class="form-label">Password</label>
                             <input type="password" id="password" name="password" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">登录</button>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
                     </form>
 
-                    <!-- Google 登录 -->
                     <div th:if="${googleEnabled}">
                         <hr class="my-3">
                         <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger w-100">
-                            <i class="bi bi-google"></i> 使用 Google 账号登录
+                            <i class="bi bi-google"></i> Sign in with Google
                         </a>
                     </div>
 
                     <p class="text-center mt-3 mb-0 text-muted small">
-                        还没有账号？<a th:href="@{/auth/register}">立即注册</a>
+                        Don't have an account? <a th:href="@{/auth/register}">Sign up</a>
                     </p>
                 </div>
             </div>

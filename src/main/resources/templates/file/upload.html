@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
-<head th:replace="~{template :: head('上传文件')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{template :: head('Upload File')}"></head>
 <body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{template :: navbar}"></nav>
@@ -17,20 +17,20 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h4 class="card-title mb-4">
-                        <i class="bi bi-cloud-upload"></i> 上传文件
+                        <i class="bi bi-cloud-upload"></i> Upload File
                     </h4>
 
                     <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
                         <div class="mb-4">
-                            <label for="file" class="form-label">选择文件 <span class="text-danger">*</span></label>
+                            <label for="file" class="form-label">Select File <span class="text-danger">*</span></label>
                             <input type="file" id="file" name="file" class="form-control" required>
                             <div class="form-text">
-                                支持 PDF、图片、音频、视频、文档等常见格式，最大 100MB
+                                Supports PDF, images, audio, video, documents and more. Max 100 MB.
                             </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-cloud-upload"></i> 开始上传
+                            <i class="bi bi-cloud-upload"></i> Upload
                         </button>
                     </form>
                 </div>

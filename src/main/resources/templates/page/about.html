@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{template :: head('About Us')}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav th:replace="~{template :: navbar}"></nav>
+
+<main class="container py-5 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-4"><i class="bi bi-info-circle"></i> About Us</h2>
+            <p class="lead">TopLinks is a simple, fast, and reliable file sharing platform designed to make it effortless to upload, manage, and share files of any type.</p>
+            <hr>
+            <h5>Our Mission</h5>
+            <p>We believe sharing files should be straightforward. TopLinks removes the complexity — just upload your file and share the link.</p>
+            <h5>What We Offer</h5>
+            <ul>
+                <li>Instant file uploads with a shareable URL</li>
+                <li>Inline preview for images, videos, audio, PDFs, documents, text, and MOBI files</li>
+                <li>Secure, direct downloads with a single click</li>
+                <li>File organization by category</li>
+                <li>Cloud storage powered by Cloudflare R2</li>
+            </ul>
+            <h5>Technology</h5>
+            <p>TopLinks is built with Spring Boot, Thymeleaf, Bootstrap 5, and Cloudflare R2 object storage.</p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{template :: footer}"></footer>
+<div th:replace="~{template :: scripts}"></div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{template :: head(${file.name})}"></head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -12,7 +12,7 @@
             <!-- 面包屑 -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a th:href="@{/}">首页</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
                     <li class="breadcrumb-item active" th:text="${file.name}"></li>
                 </ol>
             </nav>
@@ -22,7 +22,7 @@
                     <h5 class="mb-0 text-truncate" th:text="${file.name}"></h5>
                     <a th:href="@{/file/{uid}/download(uid=${file.uid})}"
                        class="btn btn-sm btn-primary ms-2 flex-shrink-0">
-                        <i class="bi bi-download"></i> 下载
+                        <i class="bi bi-download"></i> Download
                     </a>
                 </div>
 
@@ -32,7 +32,7 @@
                     <div class="row text-muted small mb-3">
                         <div class="col-auto">
                             <i class="bi bi-file-earmark"></i>
-                            <span th:text="${file.ext != null ? file.ext.toUpperCase() : '未知'}"></span>
+                            <span th:text="${file.ext != null ? file.ext.toUpperCase() : 'Unknown'}"></span>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-hdd"></i>
@@ -58,7 +58,7 @@
                     <div th:if="${file.fileType == 'video'}" class="ratio ratio-16x9">
                         <video controls class="rounded">
                             <source th:src="${file.cloudUrl}">
-                            您的浏览器不支持 HTML5 视频播放。
+                            Your browser does not support HTML5 video.
                         </video>
                     </div>
 
@@ -66,26 +66,26 @@
                     <div th:if="${file.fileType == 'audio'}" class="d-flex justify-content-center py-4">
                         <audio controls style="width:100%">
                             <source th:src="${file.cloudUrl}">
-                            您的浏览器不支持 HTML5 音频播放。
+                            Your browser does not support HTML5 audio.
                         </audio>
                     </div>
 
                     <!-- ===== PDF 预览 ===== -->
                     <div th:if="${file.fileType == 'pdf'}">
                         <iframe th:src="${file.cloudUrl}" class="w-100 border-0 rounded"
-                                style="height:75vh;" title="PDF 预览"></iframe>
+                                style="height:75vh;" title="PDF Preview"></iframe>
                     </div>
 
                     <!-- ===== 文档类（使用 Google Docs Viewer） ===== -->
                     <div th:if="${file.fileType == 'document'}">
                         <iframe th:src="'https://docs.google.com/gview?url=' + ${file.cloudUrl} + '&embedded=true'"
-                                class="w-100 border-0 rounded" style="height:75vh;" title="文档预览"></iframe>
+                                class="w-100 border-0 rounded" style="height:75vh;" title="Document Preview"></iframe>
                     </div>
 
                     <!-- ===== 文本预览 ===== -->
                     <div th:if="${file.fileType == 'text'}" style="height:75vh;">
                         <iframe th:src="${file.cloudUrl}" class="w-100 h-100 border-0 rounded"
-                                title="文本预览"></iframe>
+                                title="Text Preview"></iframe>
                     </div>
 
                     <!-- ===== Mobi 预览 ===== -->
@@ -97,9 +97,9 @@
                     <div th:if="${file.fileType == 'other'}"
                          class="text-center py-5 text-muted">
                         <i class="bi bi-file-earmark-arrow-down display-1"></i>
-                        <p class="mt-3">此文件类型暂不支持在线预览，请点击下载按钮保存到本地。</p>
+                        <p class="mt-3">This file type does not support online preview. Click the download button to save it locally.</p>
                         <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-primary">
-                            <i class="bi bi-download"></i> 下载文件
+                            <i class="bi bi-download"></i> Download File
                         </a>
                     </div>
 
