@@ -50,9 +50,10 @@ public class TlkFile extends BaseEntity {
 	public static final Set<String> AUDIO_EXTS  = Set.of("mp3","wav","ogg","flac","aac","m4a");
 	public static final Set<String> TEXT_EXTS   = Set.of("txt","md","log","csv","json","xml");
 	public static final Set<String> DOC_EXTS    = Set.of("doc","docx","xls","xlsx","ppt","pptx");
+	public static final Set<String> MOBI_EXTS   = Set.of("mobi","azw","azw3");
 
 	/**
-	 * 返回文件类型标识：image / video / audio / pdf / text / document / other
+	 * 返回文件类型标识：image / video / audio / pdf / text / document / mobi / other
 	 */
 	public String getFileType() {
 		if (ext == null) return "other";
@@ -63,6 +64,7 @@ public class TlkFile extends BaseEntity {
 		if ("pdf".equals(lower))         return "pdf";
 		if (TEXT_EXTS.contains(lower))   return "text";
 		if (DOC_EXTS.contains(lower))    return "document";
+		if (MOBI_EXTS.contains(lower))   return "mobi";
 		return "other";
 	}
 
