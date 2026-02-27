@@ -52,7 +52,7 @@ public class FileService {
     public TlkFile upload(MultipartFile file, String userId, String categoryId, HttpServletRequest request) throws IOException {
         String originalName = file.getOriginalFilename();
         if (originalName == null || originalName.isBlank()) {
-            throw new IOException("文件名不能为空");
+            throw new IOException("File name cannot be empty");
         }
         // Sanitize
         String safeName = java.nio.file.Paths.get(originalName).getFileName().toString();
@@ -127,7 +127,7 @@ public class FileService {
         do {
             uid = randomUid();
             tries++;
-            if (tries > 100) throw new RuntimeException("无法生成唯一 UID，请稍后重试");
+            if (tries > 100) throw new RuntimeException("Unable to generate a unique UID, please try again later");
         } while (fileMapper.selectCount(new QueryWrapper<TlkFile>().eq("uid", uid)) > 0);
         return uid;
     }

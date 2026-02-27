@@ -3,11 +3,11 @@
       xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6">
 
 <!--
-  共用 Thymeleaf 片段（fragments）
-  其他页面使用 th:replace="~{template :: fragmentName}" 引用
+  Shared Thymeleaf fragments.
+  Other pages reference them with: th:replace="~{template :: fragmentName}"
 -->
 
-<!-- ===== HEAD 片段 ===== -->
+<!-- ===== HEAD fragment ===== -->
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
 
 <body>
 
-<!-- ===== 导航栏 ===== -->
+<!-- ===== Navbar ===== -->
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand fw-bold" th:href="@{/}">
@@ -31,35 +31,35 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto"></ul>
             <div class="d-flex align-items-center gap-2">
-                <!-- 已登录 -->
+                <!-- Logged in -->
                 <span sec:authorize="isAuthenticated()">
                     <a th:href="@{/upload}" class="btn btn-outline-light btn-sm">
-                        <i class="bi bi-cloud-upload"></i> 上传
+                        <i class="bi bi-cloud-upload"></i> Upload
                     </a>
                     <span class="text-white-50 small ms-2"
                           th:text="${currentUser != null ? (currentUser.nickname ?: currentUser.email) : ''}"></span>
                     <form th:action="@{/auth/logout}" method="post" class="d-inline ms-2">
-                        <button type="submit" class="btn btn-outline-light btn-sm">退出</button>
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                     </form>
                 </span>
-                <!-- 未登录 -->
+                <!-- Not logged in -->
                 <span sec:authorize="!isAuthenticated()">
-                    <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm">登录</a>
-                    <a th:href="@{/auth/register}" class="btn btn-light btn-sm ms-1">注册</a>
+                    <a th:href="@{/auth/login}" class="btn btn-outline-light btn-sm">Login</a>
+                    <a th:href="@{/auth/register}" class="btn btn-light btn-sm ms-1">Register</a>
                 </span>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- ===== 页脚 ===== -->
+<!-- ===== Footer ===== -->
 <footer th:fragment="footer" class="footer mt-auto py-3 bg-light border-top">
     <div class="container text-center text-muted">
-        <small>© 2024 TopLinks &nbsp;·&nbsp; 简单、快速的文件分享平台</small>
+        <small>© 2024 TopLinks &nbsp;·&nbsp; Simple and fast file sharing platform</small>
     </div>
 </footer>
 
-<!-- ===== 公共脚本 ===== -->
+<!-- ===== Common scripts ===== -->
 <div th:fragment="scripts">
     <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/static/js/common.js}"></script>

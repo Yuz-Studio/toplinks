@@ -60,7 +60,7 @@ public class FileController {
             RedirectAttributes redirectAttributes) {
 
         if (file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "请选择要上传的文件");
+            redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
             redirectAttributes.addFlashAttribute("alertClass", "alert-warning");
             return "redirect:/upload";
         }
@@ -68,12 +68,12 @@ public class FileController {
         try {
             String userId = resolveUserId(authentication);
             TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
-            redirectAttributes.addFlashAttribute("message", "文件上传成功！访问地址：/file/" + tlkFile.getUid());
+            redirectAttributes.addFlashAttribute("message", "File uploaded successfully! URL: /file/" + tlkFile.getUid());
             redirectAttributes.addFlashAttribute("alertClass", "alert-success");
             return "redirect:/file/" + tlkFile.getUid();
         } catch (IOException e) {
             logger.warning("File upload failed: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("message", "上传失败：" + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Upload failed: " + e.getMessage());
             redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
             return "redirect:/upload";
         }
