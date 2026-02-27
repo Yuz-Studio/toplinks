@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         SysUser user = findByEmail(email);
         if (user == null) {
-            throw new UsernameNotFoundException("用户不存在: " + email);
+            throw new UsernameNotFoundException("User not found: " + email);
         }
         return User.withUsername(user.getEmail())
                 .password(user.getPassword() != null ? user.getPassword() : "")
@@ -49,7 +49,7 @@ public class UserService implements UserDetailsService {
     @CacheEvict(value = "users", key = "#email")
     public SysUser register(String email, String password, String nickname) {
         if (findByEmail(email) != null) {
-            throw new IllegalArgumentException("该邮箱已注册");
+            throw new IllegalArgumentException("This email is already registered");
         }
         SysUser user = new SysUser();
         user.setId(UUID.randomUUID().toString());

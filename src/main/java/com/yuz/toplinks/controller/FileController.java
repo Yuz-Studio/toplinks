@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.yuz.toplinks.entity.TlkFile;
 import com.yuz.toplinks.entity.SysUser;
 import com.yuz.toplinks.service.FileService;
+import com.yuz.toplinks.service.FileStorageService;
 import com.yuz.toplinks.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,10 +32,16 @@ public class FileController {
 
     private final FileService fileService;
     private final UserService userService;
+    private final FileStorageService fileStorageService;
+    private final com.yuz.toplinks.service.CloudflareStorageService cloudflareStorageService;
 
-    public FileController(FileService fileService, UserService userService) {
+    public FileController(FileService fileService, UserService userService,
+            FileStorageService fileStorageService,
+            com.yuz.toplinks.service.CloudflareStorageService cloudflareStorageService) {
         this.fileService = fileService;
         this.userService = userService;
+        this.fileStorageService = fileStorageService;
+        this.cloudflareStorageService = cloudflareStorageService;
     }
 
     /** 文件上传页面（需要登录） */
@@ -53,7 +60,7 @@ public class FileController {
             RedirectAttributes redirectAttributes) {
 
         if (file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "请选择要上传的文件");
+            redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
             redirectAttributes.addFlashAttribute("alertClass", "alert-warning");
             return "redirect:/upload";
         }
@@ -61,19 +68,19 @@ public class FileController {
         try {
             String userId = resolveUserId(authentication);
             TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
-            redirectAttributes.addFlashAttribute("message", "文件上传成功！访问地址：/f/" + tlkFile.getUid());
+            redirectAttributes.addFlashAttribute("message", "File uploaded successfully! URL: /file/" + tlkFile.getUid());
             redirectAttributes.addFlashAttribute("alertClass", "alert-success");
-            return "redirect:/f/" + tlkFile.getUid();
+            return "redirect:/file/" + tlkFile.getUid();
         } catch (IOException e) {
             logger.warning("File upload failed: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("message", "上传失败：" + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Upload failed: " + e.getMessage());
             redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
             return "redirect:/upload";
         }
     }
 
     /** 文件详情页面（公开访问） */
-    @GetMapping("/f/{uid}")
+    @GetMapping("/file/{uid}")
     public String fileDetail(@PathVariable String uid, Model model) {
         TlkFile file = fileService.findByUid(uid);
         if (file == null) {
@@ -84,23 +91,61 @@ public class FileController {
     }
 
     /**
-     * 文件下载。
-     * 图片类直接重定向到 Cloudflare URL，避免占用服务器带宽。
-     * 其他文件同样通过重定向让 Cloudflare 直接传输。
+     * 文件下载：通过服务端代理返回文件，并强制触发浏览器下载（Content-Disposition: attachment）。
      */
-    @GetMapping("/f/{uid}/download")
-    public ResponseEntity<Void> downloadFile(@PathVariable String uid) {
+    @GetMapping("/file/{uid}/download")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<org.springframework.core.io.Resource> downloadFile(
+            @PathVariable String uid) {
         TlkFile file = fileService.findByUid(uid);
-        if (file == null) {
+        if (file == null || file.getPath() == null) {
             return ResponseEntity.notFound().build();
         }
-        String cloudUrl = file.getCloudUrl();
-        if (cloudUrl == null || cloudUrl.isBlank()) {
+        try {
+            String fileName = file.getName() != null ? file.getName() : file.getUid();
+            String disposition = org.springframework.http.ContentDisposition.attachment()
+                    .filename(fileName, java.nio.charset.StandardCharsets.UTF_8)
+                    .build().toString();
+            org.springframework.http.MediaType contentType =
+                    org.springframework.http.MediaTypeFactory.getMediaType(fileName)
+                            .orElse(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+            // Open stream last; if it fails the catch block handles cleanup.
+            java.io.InputStream inputStream = cloudflareStorageService.getInputStream(file.getPath());
+            org.springframework.core.io.Resource resource =
+                    new org.springframework.core.io.InputStreamResource(inputStream);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                    .contentType(contentType)
+                    .body(resource);
+        } catch (java.io.IOException e) {
+            logger.warning("File download failed for uid=" + uid + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * 原始文件内容代理，供前端 mobi 预览使用（同源请求，无 CORS 问题）。
+     */
+    @GetMapping("/file/{uid}/raw")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<org.springframework.core.io.Resource> getRawContent(
+            @PathVariable String uid) {
+        TlkFile file = fileService.findByUid(uid);
+        if (file == null || file.getPath() == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, cloudUrl)
-                .build();
+        try {
+            // Open stream last; if it fails the catch block handles cleanup.
+            java.io.InputStream inputStream = cloudflareStorageService.getInputStream(file.getPath());
+            org.springframework.core.io.Resource resource =
+                    new org.springframework.core.io.InputStreamResource(inputStream);
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (java.io.IOException e) {
+            logger.warning("File raw access failed for uid=" + uid + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // ---- legacy local-file endpoint (fallback when R2 is disabled) ----
@@ -108,8 +153,7 @@ public class FileController {
     @GetMapping("/files/{filename:.+}")
     @org.springframework.web.bind.annotation.ResponseBody
     public ResponseEntity<org.springframework.core.io.Resource> serveLocalFile(
-            @PathVariable String filename,
-            com.yuz.toplinks.service.FileStorageService fileStorageService) {
+            @PathVariable String filename) {
         try {
             java.nio.file.Path filePath = fileStorageService.getFilePath(filename);
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());

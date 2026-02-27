@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6"
-      lang="zh-CN">
-<head th:replace="~{template :: head('首页')}"></head>
+      lang="en">
+<head th:replace="~{template :: head('Home')}"></head>
 <body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{template :: navbar}"></nav>
@@ -20,7 +20,7 @@
         <div class="d-flex flex-wrap gap-2 align-items-center">
             <a th:href="@{/}" th:classappend="${selectedCategory == null ? ' active' : ''}"
                class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-grid"></i> 全部
+                <i class="bi bi-grid"></i> All
             </a>
             <a th:each="cat : ${categories}"
                th:href="@{/(categoryId=${cat.id})}"
@@ -35,12 +35,12 @@
     <!-- 文件列表 -->
     <div th:if="${files == null or #lists.isEmpty(files)}" class="text-center text-muted py-5">
         <i class="bi bi-inbox display-4"></i>
-        <p class="mt-2">暂无文件</p>
+        <p class="mt-2">No files yet</p>
         <a sec:authorize="isAuthenticated()" th:href="@{/upload}" class="btn btn-primary mt-2">
-            <i class="bi bi-cloud-upload"></i> 上传第一个文件
+            <i class="bi bi-cloud-upload"></i> Upload the first file
         </a>
         <a sec:authorize="!isAuthenticated()" th:href="@{/auth/login}" class="btn btn-primary mt-2">
-            登录后上传
+            Log in to upload
         </a>
     </div>
 
@@ -76,10 +76,10 @@
                     </p>
                 </div>
                 <div class="card-footer p-2 d-flex gap-1">
-                    <a th:href="@{/f/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
-                        <i class="bi bi-eye"></i> 查看
+                    <a th:href="@{/file/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                        <i class="bi bi-eye"></i> View
                     </a>
-                    <a th:href="@{/f/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
+                    <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
                         <i class="bi bi-download"></i>
                     </a>
                 </div>
@@ -87,14 +87,14 @@
         </div>
     </div>
     <!-- 分页 -->
-    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="文件列表分页">
+    <nav th:if="${totalPages > 1}" class="mt-4 d-flex justify-content-center" aria-label="File list pagination">
         <ul class="pagination">
             <li th:classappend="${currentPage <= 1 ? ' disabled' : ''}" class="page-item">
                 <a class="page-link"
                    th:href="${selectedCategory != null}
                        ? @{/(categoryId=${selectedCategory}, page=${currentPage - 1})}
                        : @{/(page=${currentPage - 1})}"
-                   aria-label="上一页">
+                   aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
@@ -111,7 +111,7 @@
                    th:href="${selectedCategory != null}
                        ? @{/(categoryId=${selectedCategory}, page=${currentPage + 1})}
                        : @{/(page=${currentPage + 1})}"
-                   aria-label="下一页">
+                   aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

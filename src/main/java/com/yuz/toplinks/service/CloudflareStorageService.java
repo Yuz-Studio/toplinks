@@ -104,6 +104,27 @@ public class CloudflareStorageService {
         return r2Enabled;
     }
 
+    /**
+     * 下载对象并返回输入流。
+     * 当流包装在 {@link org.springframework.core.io.InputStreamResource} 中时，
+     * Spring MVC 的 {@code ResourceHttpMessageConverter} 在响应写入完成后负责关闭流；
+     * 其他调用方须自行关闭流（建议使用 try-with-resources）。
+     */
+    public java.io.InputStream getInputStream(String objectKey) throws java.io.IOException {
+        if (r2Enabled) {
+            return s3Client.getObject(
+                    software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(objectKey)
+                            .build());
+        } else {
+            String filename = objectKey.contains("/")
+                    ? objectKey.substring(objectKey.lastIndexOf('/') + 1)
+                    : objectKey;
+            return java.nio.file.Files.newInputStream(localStorage.getFilePath(filename));
+        }
+    }
+
     private String buildPublicUrl(String objectKey) {
         if (publicUrl.isBlank()) {
             // publicUrl must be configured when R2 is enabled; log a warning and return object key as path
