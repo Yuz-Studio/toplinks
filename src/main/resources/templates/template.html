@@ -12,6 +12,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' - TopLinks'">TopLinks</title>
+    <!-- Apply saved theme before CSS to avoid flash -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('tlk-theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
     <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/static/css/bootstrap-icons.css}">
     <link rel="stylesheet" th:href="@{/static/style/common.css}">
@@ -20,14 +27,21 @@
 <body>
 
 <!-- ===== Navbar ===== -->
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg sticky-top shadow-sm tlk-navbar">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}">
+        <a class="navbar-brand fw-bold fs-5" th:href="@{/}">
             <i class="bi bi-link-45deg"></i> TopLinks
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <!-- Theme toggle -->
+            <button id="themeToggle" class="btn btn-sm tlk-theme-btn" title="Toggle dark/light mode" aria-label="Toggle theme">
+                <i class="bi bi-moon-fill" id="themeIcon"></i>
+            </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto"></ul>
             <div class="d-flex align-items-center gap-2">
@@ -53,7 +67,7 @@
 </nav>
 
 <!-- ===== Footer ===== -->
-<footer th:fragment="footer" class="footer mt-auto py-3 bg-light border-top">
+<footer th:fragment="footer" class="footer mt-auto py-3 border-top">
     <div class="container text-center text-muted">
         <small>© 2024 TopLinks &nbsp;·&nbsp; Simple and fast file sharing platform</small>
         <div class="mt-1">
@@ -71,7 +85,36 @@
 <div th:fragment="scripts">
     <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/static/js/common.js}"></script>
+    <script>
+        // Dark / light mode toggle
+        (function () {
+            var btn = document.getElementById('themeToggle');
+            var icon = document.getElementById('themeIcon');
+            if (!btn || !icon) return;
+
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                localStorage.setItem('tlk-theme', theme);
+                if (theme === 'dark') {
+                    icon.className = 'bi bi-sun-fill';
+                    btn.title = 'Switch to light mode';
+                } else {
+                    icon.className = 'bi bi-moon-fill';
+                    btn.title = 'Switch to dark mode';
+                }
+            }
+
+            // Sync icon with current theme on page load
+            applyTheme(document.documentElement.getAttribute('data-bs-theme') || 'light');
+
+            btn.addEventListener('click', function () {
+                var current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+        })();
+    </script>
 </div>
 
 </body>
 </html>
+
