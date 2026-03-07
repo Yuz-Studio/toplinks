@@ -26,7 +26,7 @@ public class HomeController {
 
     private static final int PAGE_SIZE = FileService.DEFAULT_PAGE_SIZE;
     /** Maximum number of files shown per category section on the default homepage. */
-    private static final int SECTION_SIZE = 6;
+    private static final int SECTION_SIZE = 10;
 
     @GetMapping("/")
     public String index(

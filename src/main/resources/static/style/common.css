@@ -65,7 +65,7 @@ body {
 
 /* Card preview area (image or icon) */
 .tlk-preview {
-    height: 110px;
+    height: 90px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@ body {
 
 /* File type icon inside preview */
 .tlk-file-icon {
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     opacity: 0.85;
 }
 

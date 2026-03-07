@@ -155,7 +155,7 @@
     <!-- Non-image icon -->
     <div th:unless="${file.fileType == 'image'}"
          class="card-img-top d-flex align-items-center justify-content-center tlk-preview bg-body-tertiary">
-        <i th:class="${'bi display-3 tlk-file-icon ' +
+        <i th:class="${'bi tlk-file-icon ' +
             (file.fileType == 'video'    ? 'bi-play-circle text-danger' :
              file.fileType == 'audio'    ? 'bi-music-note-beamed text-warning' :
              file.fileType == 'pdf'      ? 'bi-file-earmark-pdf text-danger' :
