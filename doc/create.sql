@@ -62,9 +62,10 @@ CREATE TABLE IF NOT EXISTS `TLK_FILE` (
 
 -- 示例分类数据
 INSERT IGNORE INTO `TLK_CATEGORY` (`id`, `name`, `description`, `icon`, `sort_order`, `status`, `deleted`, `create_time`) VALUES
-  ('cat-001', '图片',   '图片类文件',   'bi-image',               1, 1, 0, NOW()),
-  ('cat-002', '文档',   '文档类文件',   'bi-file-earmark-word',   2, 1, 0, NOW()),
-  ('cat-003', 'PDF',    'PDF 文件',     'bi-file-earmark-pdf',    3, 1, 0, NOW()),
-  ('cat-004', '音频',   '音频类文件',   'bi-music-note-beamed',   4, 1, 0, NOW()),
-  ('cat-005', '视频',   '视频类文件',   'bi-play-circle',         5, 1, 0, NOW()),
-  ('cat-006', '其他',   '其他类型文件', 'bi-file-earmark',        6, 1, 0, NOW());
+  ('images', 'Images',   '图片类文件',   'bi-image',               1, 1, 0, NOW()),
+  ('ebooks', 'Ebooks',   '电子书',   'bi-book',               2, 1, 0, NOW()),
+  ('documents', 'Documents',   '文档类文件',   'bi-file-earmark-word',   3, 1, 0, NOW()),
+  ('pdfs', 'PDFs',    'PDF 文件',     'bi-file-earmark-pdf',    4, 1, 0, NOW()),
+  ('audios', 'Audios',   '音频类文件',   'bi-music-note-beamed',   5, 1, 0, NOW()),
+  ('videos', 'Videos',   '视频类文件',   'bi-play-circle',         6, 1, 0, NOW()),
+  ('others', 'Others',   '其他类型文件', 'bi-file-earmark',        7, 1, 0, NOW());
