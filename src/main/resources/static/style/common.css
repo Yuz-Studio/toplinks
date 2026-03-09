@@ -1,16 +1,84 @@
-body {
-    background-color: #f8f9fa;
+/* =====================================================
+   TopLinks – custom styles (light + dark theme)
+   Bootstrap 5.3 handles most theming via data-bs-theme.
+   These rules cover project-specific components.
+   ===================================================== */
+
+/* ---------- Navbar ---------- */
+.tlk-navbar {
+    background-color: #0d6efd;
+}
+[data-bs-theme="dark"] .tlk-navbar {
+    background-color: #1a1d21;
+    border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
+/* Theme-toggle button */
+.tlk-theme-btn {
+    color: rgba(255,255,255,.85);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+.tlk-theme-btn:hover {
+    background-color: rgba(255,255,255,.2);
+    color: #fff;
+}
+
+/* ---------- Body ---------- */
+body {
+    background-color: #f5f7fb;
+}
+[data-bs-theme="dark"] body {
+    background-color: #0f1117;
+}
+
+/* ---------- Category section header ---------- */
+.tlk-section-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #dee2e6;
+}
+[data-bs-theme="dark"] .tlk-section-header {
+    border-bottom-color: rgba(255,255,255,.12);
+}
+
+.tlk-view-all {
+    font-size: 0.8rem;
+}
+
+/* ---------- File card ---------- */
 .file-card {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 0.5rem;
+    overflow: hidden;
 }
-
 .file-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,.15) !important;
 }
 
+/* Card preview area (image or icon) */
+.tlk-preview {
+    height: 90px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* File type icon inside preview */
+.tlk-file-icon {
+    font-size: 1.6rem;
+    opacity: 0.85;
+}
+
+/* ---------- Footer ---------- */
 .footer {
     margin-top: auto;
 }

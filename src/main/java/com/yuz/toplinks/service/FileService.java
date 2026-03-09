@@ -96,6 +96,18 @@ public class FileService {
 
     public static final int DEFAULT_PAGE_SIZE = 12;
 
+    public List<TlkFile> listByCategoryLimited(String categoryId, int limit) {
+        if (limit < 1) limit = DEFAULT_PAGE_SIZE;
+        QueryWrapper<TlkFile> qw = new QueryWrapper<TlkFile>()
+                .eq("status", BaseEntity.STATUS_ACTIVE)
+                .orderByDesc("create_time")
+                .last("LIMIT " + limit);
+        if (categoryId != null && !categoryId.isBlank()) {
+            qw.eq("category_id", categoryId);
+        }
+        return fileMapper.selectList(qw);
+    }
+
     public List<TlkFile> listByCategory(String categoryId, int page, int pageSize) {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = DEFAULT_PAGE_SIZE;
