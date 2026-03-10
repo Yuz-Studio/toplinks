@@ -112,7 +112,7 @@
 
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>
-<script th:if="${file.fileType == 'mobi'}" th:src="@{/js/mobi-reader.js}"></script>
+<script th:if="${file.fileType == 'mobi'}" th:src="@{/static/js/mobi-reader.js}"></script>
 <script th:if="${file.fileType == 'mobi'}">
     (function () {
         var container = document.getElementById('mobi-preview-container');
