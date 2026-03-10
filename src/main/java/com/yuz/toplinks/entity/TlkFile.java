@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
 
@@ -14,6 +15,7 @@ import lombok.Data;
  */
 @TableName("TLK_FILE")
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TlkFile extends BaseEntity {
 
 	//文件名称
