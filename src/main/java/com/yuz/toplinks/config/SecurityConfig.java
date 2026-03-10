@@ -45,6 +45,7 @@ public class SecurityConfig {
         if (isGoogleOAuthEnabled()) {
             http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/auth/login")
+                .loginProcessingUrl("/login-by-google")
                 .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .oidcUserService(customOAuth2UserService)
