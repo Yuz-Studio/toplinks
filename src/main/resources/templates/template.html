@@ -32,18 +32,18 @@
         <a class="navbar-brand fw-bold fs-5" th:href="@{/}">
             <i class="bi bi-link-45deg"></i> TopLinks
         </a>
-        <div class="d-flex align-items-center gap-2">
-            <!-- Theme toggle – always visible on all screen sizes -->
-            <button id="themeToggle" class="btn btn-sm tlk-theme-btn" title="Toggle dark/light mode" aria-label="Toggle theme">
-                <i class="bi bi-moon-fill" id="themeIcon"></i>
-            </button>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <!-- Theme toggle -->
+                <li class="nav-item me-2"> 
+                    <button id="themeToggle" class="btn btn-sm tlk-theme-btn" title="Toggle dark/light mode" aria-label="Toggle theme">
+                        <i class="bi bi-moon-fill" id="themeIcon"></i>
+                    </button>
+                </li>
                 <!-- Logged in -->
                 <li sec:authorize="isAuthenticated()" class="nav-item">
                     <a th:href="@{/upload}" class="btn btn-outline-light btn-sm">
@@ -122,4 +122,3 @@
 
 </body>
 </html>
-

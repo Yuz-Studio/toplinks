@@ -3,6 +3,7 @@ package com.yuz.toplinks.entity;
 import java.util.Set;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -77,5 +78,26 @@ public class TlkFile extends BaseEntity {
 		if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
 		if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
 		return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
+	}
+	
+	@JsonIgnore
+	public String getIconClass() {
+		String type = getFileType();
+		switch (type) {
+		case "video":
+			return "bi-play-circle text-danger";
+		case "audio":
+			return "bi-music-note-beamed text-warning";
+		case "pdf":
+			return "bi-file-earmark-pdf text-danger";
+		case "text":
+			return "bi-file-earmark-text text-info";
+		case "document":
+			return "bi-file-earmark-word text-primary";
+		case "mobi":
+			return "bi-book text-success";
+		default:
+			return "bi-file-earmark text-secondary";
+		}
 	}
 }

@@ -23,7 +23,7 @@
                 <i class="bi bi-grid"></i> All
             </a>
             <a th:each="cat : ${categories}"
-               th:href="@{/(categoryId=${cat.id})}"
+               th:href="@{/category/{id}(id=${cat.id})}"
                th:classappend="${selectedCategory == cat.id ? ' active' : ''}"
                class="btn btn-sm btn-outline-secondary">
                 <i th:class="${'bi ' + (cat.icon ?: 'bi-folder')}"></i>
@@ -55,7 +55,28 @@
                 </div>
                 <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
                     <div th:each="file : ${recentFiles}" class="col">
-                        <div th:replace="~{:: fileCard(${file})}"></div>
+                        <div class="card h-100 shadow-sm file-card">
+                            <div th:if="${file.fileType == 'image'}" class="card-img-top tlk-preview bg-body-tertiary">
+                                <img th:src="${file.cloudUrl}" th:alt="${file.name}" class="h-100 w-100" style="object-fit:cover;">
+                            </div>
+                            <div th:unless="${file.fileType == 'image'}" class="card-img-top d-flex align-items-center justify-content-center tlk-preview bg-body-tertiary">
+                                <i th:class="${'bi tlk-file-icon ' + file.iconClass}"></i>
+                            </div>
+                            <div class="card-body p-2">
+                                <p class="card-text text-truncate small fw-semibold mb-1" th:text="${file.name}" th:title="${file.name}"></p>
+                                <p class="card-text text-muted" style="font-size:0.7rem;">
+                                    <span th:text="${file.sizeText}"></span>
+                                </p>
+                            </div>
+                            <div class="card-footer p-2 d-flex gap-1">
+                                <a th:href="@{/file/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -63,28 +84,39 @@
 
         <!-- Category sections -->
         <div th:unless="${#lists.isEmpty(categorySections)}">
-            <div th:each="section, iterStat : ${categorySections}"
-                 th:classappend="${iterStat.last ? '' : ' mb-5'}"
-                 class="tlk-category-section">
-                <!-- Section header -->
-                <div class="tlk-section-header d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold mb-0">
-                        <i th:class="${'bi me-2 ' + (section.category.icon ?: 'bi-folder')}"></i>
-                        <span th:text="${section.category.name}"></span>
-                    </h5>
-                    <a th:href="@{/(categoryId=${section.category.id})}"
-                       class="btn btn-sm btn-outline-secondary tlk-view-all">
-                        View All <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-                <!-- Files grid -->
-                <div th:if="${section.files.isEmpty()}" class="text-muted small py-2 ps-1">
-                    <i class="bi bi-inbox me-1"></i> No files in this category yet.
-                </div>
-                <div th:unless="${section.files.isEmpty()}"
-                     class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-                    <div th:each="file : ${section.files}" class="col">
-                        <div th:replace="~{:: fileCard(${file})}"></div>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div th:each="section, iterStat : ${categorySections}" class="col">
+                    <div class="card h-100 shadow-sm">
+                        <!-- Section header -->
+                        <div class="card-header d-flex align-items-center justify-content-between bg-body-tertiary">
+                            <h6 class="fw-bold mb-0 text-truncate" th:title="${section.category.name}">
+                                <i th:class="${'bi me-2 ' + (section.category.icon ?: 'bi-folder')}"></i>
+                                <span th:text="${section.category.name}"></span>
+                            </h6>
+                            <a th:href="@{/category/{id}(id=${section.category.id})}"
+                               class="text-decoration-none small text-secondary">
+                                More <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                            </a>
+                        </div>
+                        <!-- Category content -->
+                        <div class="list-group list-group-flush">
+                            <div th:each="file, iterStat : ${section.files}" th:if="${iterStat.index < 10}" 
+                                 class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center text-truncate me-2">
+                                    <i th:class="${'bi me-2 ' + (file.iconClass ?: 'bi-file-earmark')}"></i>
+                                    <a th:href="@{/file/{uid}(uid=${file.uid})}" 
+                                       class="text-decoration-none text-body text-truncate" 
+                                       th:text="${file.name}" th:title="${file.name}"></a>
+                                </div>
+                                <a th:href="@{/file/{uid}/download(uid=${file.uid})}" 
+                                   class="text-secondary" title="Download">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                            <div th:if="${#lists.isEmpty(section.files)}" class="list-group-item text-center text-muted small py-3">
+                                No files available
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,7 +138,28 @@
         <div th:unless="${#lists.isEmpty(files)}"
              class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
             <div th:each="file : ${files}" class="col">
-                <div th:replace="~{:: fileCard(${file})}"></div>
+                <div class="card h-100 shadow-sm file-card">
+                    <div th:if="${file.fileType == 'image'}" class="card-img-top tlk-preview bg-body-tertiary">
+                        <img th:src="${file.cloudUrl}" th:alt="${file.name}" class="h-100 w-100" style="object-fit:cover;">
+                    </div>
+                    <div th:unless="${file.fileType == 'image'}" class="card-img-top d-flex align-items-center justify-content-center tlk-preview bg-body-tertiary">
+                        <i th:class="${'bi tlk-file-icon ' + file.iconClass}"></i>
+                    </div>
+                    <div class="card-body p-2">
+                        <p class="card-text text-truncate small fw-semibold mb-1" th:text="${file.name}" th:title="${file.name}"></p>
+                        <p class="card-text text-muted" style="font-size:0.7rem;">
+                            <span th:text="${file.sizeText}"></span>
+                        </p>
+                    </div>
+                    <div class="card-footer p-2 d-flex gap-1">
+                        <a th:href="@{/file/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -116,7 +169,7 @@
                 <li th:classappend="${currentPage <= 1 ? ' disabled' : ''}" class="page-item">
                     <a class="page-link"
                        th:href="${selectedCategory != null}
-                           ? @{/(categoryId=${selectedCategory}, page=${currentPage - 1})}
+                           ? @{/category/{id}(id=${selectedCategory}, page=${currentPage - 1})}
                            : @{/(page=${currentPage - 1})}"
                        aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
@@ -126,14 +179,14 @@
                     th:classappend="${i == currentPage ? ' active' : ''}" class="page-item">
                     <a class="page-link"
                        th:href="${selectedCategory != null}
-                           ? @{/(categoryId=${selectedCategory}, page=${i})}
+                           ? @{/category/{id}(id=${selectedCategory}, page=${i})}
                            : @{/(page=${i})}"
                        th:text="${i}"></a>
                 </li>
                 <li th:classappend="${currentPage >= totalPages ? ' disabled' : ''}" class="page-item">
                     <a class="page-link"
                        th:href="${selectedCategory != null}
-                           ? @{/(categoryId=${selectedCategory}, page=${currentPage + 1})}
+                           ? @{/category/{id}(id=${selectedCategory}, page=${currentPage + 1})}
                            : @{/(page=${currentPage + 1})}"
                        aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
@@ -144,42 +197,6 @@
     </div>
 
 </main>
-
-<!-- ===== Reusable file card fragment ===== -->
-<div th:fragment="fileCard(file)" class="card h-100 shadow-sm file-card">
-    <!-- Image preview -->
-    <div th:if="${file.fileType == 'image'}" class="card-img-top tlk-preview bg-body-tertiary">
-        <img th:src="${file.cloudUrl}" th:alt="${file.name}"
-             class="h-100 w-100" style="object-fit:cover;">
-    </div>
-    <!-- Non-image icon -->
-    <div th:unless="${file.fileType == 'image'}"
-         class="card-img-top d-flex align-items-center justify-content-center tlk-preview bg-body-tertiary">
-        <i th:class="${'bi tlk-file-icon ' +
-            (file.fileType == 'video'    ? 'bi-play-circle text-danger' :
-             file.fileType == 'audio'    ? 'bi-music-note-beamed text-warning' :
-             file.fileType == 'pdf'      ? 'bi-file-earmark-pdf text-danger' :
-             file.fileType == 'text'     ? 'bi-file-earmark-text text-info' :
-             file.fileType == 'document' ? 'bi-file-earmark-word text-primary' :
-             file.fileType == 'mobi'     ? 'bi-book text-success' :
-                                           'bi-file-earmark text-secondary')}"></i>
-    </div>
-    <div class="card-body p-2">
-        <p class="card-text text-truncate small fw-semibold mb-1" th:text="${file.name}"
-           th:title="${file.name}"></p>
-        <p class="card-text text-muted" style="font-size:0.7rem;">
-            <span th:text="${file.sizeText}"></span>
-        </p>
-    </div>
-    <div class="card-footer p-2 d-flex gap-1">
-        <a th:href="@{/file/{uid}(uid=${file.uid})}" class="btn btn-sm btn-outline-primary flex-grow-1">
-            <i class="bi bi-eye"></i>
-        </a>
-        <a th:href="@{/file/{uid}/download(uid=${file.uid})}" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-download"></i>
-        </a>
-    </div>
-</div>
 
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>

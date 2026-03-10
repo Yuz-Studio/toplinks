@@ -6,7 +6,10 @@ import java.util.Date;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(value = { "createTimeText", "updateTimeText", "lastOperateTimeText", "lastOperateDateText",
+		"statusText" }, allowGetters = true)
 public class BaseEntity implements Serializable {
 
 	/**
