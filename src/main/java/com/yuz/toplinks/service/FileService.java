@@ -57,6 +57,15 @@ public class FileService {
         // Sanitize
         String safeName = java.nio.file.Paths.get(originalName).getFileName().toString();
         String ext = extractExt(safeName);
+
+        // 计算文件hash并判重（在上传到R2之前）
+        byte[] fileBytes = file.getBytes();
+        String hash = computeMd5(fileBytes);
+        TlkFile existing = findByHash(hash);
+        if (existing != null) {
+            throw new IOException("文件已存在，相同文件地址: /file/" + existing.getUid());
+        }
+
         String uid = generateUniqueUid();
         String objectKey = "files/" + uid + (ext.isEmpty() ? "" : "." + ext);
 
@@ -64,9 +73,8 @@ public class FileService {
                 .map(MediaType::toString)
                 .orElse("application/octet-stream");
 
-        String cloudUrl = storageService.upload(objectKey, file.getInputStream(), file.getSize(), contentType);
+        String cloudUrl = storageService.upload(objectKey, new java.io.ByteArrayInputStream(fileBytes), file.getSize(), contentType);
 
-        String hash = computeMd5(file.getBytes());
         String ip = getClientIp(request);
 
         TlkFile tlkFile = new TlkFile();
@@ -92,6 +100,17 @@ public class FileService {
     @Cacheable(value = "fileByUid", key = "#uid")
     public TlkFile findByUid(String uid) {
         return fileMapper.selectOne(new QueryWrapper<TlkFile>().eq("uid", uid));
+    }
+
+    /**
+     * 根据文件hash查找已存在的文件记录。
+     */
+    public TlkFile findByHash(String hash) {
+        if (hash == null || hash.isBlank()) return null;
+        return fileMapper.selectOne(new QueryWrapper<TlkFile>()
+                .eq("hash", hash)
+                .eq("status", BaseEntity.STATUS_ACTIVE)
+                .last("LIMIT 1"));
     }
 
     public static final int DEFAULT_PAGE_SIZE = 12;
