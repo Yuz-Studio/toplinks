@@ -81,12 +81,16 @@ public class FileController {
 
     /** 文件详情页面（公开访问） */
     @GetMapping("/file/{uid}")
-    public String fileDetail(@PathVariable String uid, Model model) {
+    public String fileDetail(@PathVariable String uid, Model model, HttpServletRequest request) {
         TlkFile file = fileService.findByUid(uid);
         if (file == null) {
             return "error/404";
         }
         model.addAttribute("file", file);
+        // 构建绝对URL用于SEO标签
+        String baseUrl = request.getScheme() + "://" + request.getServerName()
+                + (request.getServerPort() == 80 || request.getServerPort() == 443 ? "" : ":" + request.getServerPort());
+        model.addAttribute("baseUrl", baseUrl);
         return "file/detail";
     }
 

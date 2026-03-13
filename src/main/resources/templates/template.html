@@ -19,9 +19,9 @@
             document.documentElement.setAttribute('data-bs-theme', t);
         })();
     </script>
-    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/static/css/bootstrap-icons.css}">
-    <link rel="stylesheet" th:href="@{/static/style/common.css}">
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css(v=${v})}">
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap-icons.css(v=${v})}">
+    <link rel="stylesheet" th:href="@{/static/style/common.css(v=${v})}">
 </head>
 
 <body>
@@ -88,8 +88,8 @@
 
 <!-- ===== Common scripts ===== -->
 <div th:fragment="scripts">
-    <script th:src="@{/static/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/static/js/common.js}"></script>
+    <script th:src="@{/static/js/bootstrap.bundle.min.js(v=${v})}"></script>
+    <script th:src="@{/static/js/common.js(v=${v})}"></script>
     <script>
         // Dark / light mode toggle
         (function () {

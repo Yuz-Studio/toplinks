@@ -11,28 +11,38 @@ import com.yuz.toplinks.service.UserService;
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
-    private final UserService userService;
+	/** 静态资源版本号，每次部署时修改，用于刷新浏览器缓存 */
+	public static final String ASSET_VERSION = String.valueOf((System.currentTimeMillis() + 9) % 100) + "."
+			+ String.valueOf(System.currentTimeMillis() % 10000000);
 
-    public GlobalControllerAdvice(UserService userService) {
-        this.userService = userService;
-    }
+	private final UserService userService;
 
-    /**
-     * Makes {@code currentUser} available in every Thymeleaf template.
-     * Returns null when unauthenticated.
-     */
-    @ModelAttribute("currentUser")
-    public SysUser currentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-        String email;
-        if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
-            email = oAuth2User.getAttribute("email");
-        } else {
-            email = authentication.getName();
-        }
-        if (email == null) return null;
-        return userService.findByEmail(email);
-    }
+	public GlobalControllerAdvice(UserService userService) {
+		this.userService = userService;
+	}
+
+	@ModelAttribute("v")
+	public String assetVersion() {
+		return ASSET_VERSION;
+	}
+
+	/**
+	 * Makes {@code currentUser} available in every Thymeleaf template. Returns null
+	 * when unauthenticated.
+	 */
+	@ModelAttribute("currentUser")
+	public SysUser currentUser(Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return null;
+		}
+		String email;
+		if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
+			email = oAuth2User.getAttribute("email");
+		} else {
+			email = authentication.getName();
+		}
+		if (email == null)
+			return null;
+		return userService.findByEmail(email);
+	}
 }

@@ -1,6 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head th:replace="~{template :: head(${file.name})}"></head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${file.name} + ' - Free Download | TopLinks'">File - TopLinks</title>
+
+    <!-- SEO Meta -->
+    <meta name="description" th:content="'Free download ' + ${file.name} + ' (' + ${file.sizeText} + ', ' + (${file.ext} != null ? ${file.ext.toUpperCase()} : 'File') + '). Fast, free and secure file sharing on TopLinks.'">
+    <meta name="keywords" th:content="${file.name} + ',' + (${file.ext} ?: '') + ',' + (${file.ext} != null ? ${file.ext.toUpperCase()} : '') + ' download,free download,file sharing,TopLinks'">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="TopLinks">
+    <link rel="canonical" th:href="${baseUrl} + '/file/' + ${file.uid}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="TopLinks">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:title" th:content="${file.name} + ' - Free Download | TopLinks'">
+    <meta property="og:description" th:content="'Free download ' + ${file.name} + ' (' + ${file.sizeText} + '). Fast and free file sharing on TopLinks.'">
+    <meta property="og:url" th:content="${baseUrl} + '/file/' + ${file.uid}">
+    <meta th:if="${file.fileType == 'image'}" property="og:image" th:content="${file.cloudUrl}">
+    <meta th:if="${file.fileType == 'image'}" property="og:image:alt" th:content="${file.name}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" th:content="${file.fileType == 'image' ? 'summary_large_image' : 'summary'}">
+    <meta name="twitter:title" th:content="${file.name} + ' - Free Download | TopLinks'">
+    <meta name="twitter:description" th:content="'Free download ' + ${file.name} + ' (' + ${file.sizeText} + '). Fast and free file sharing.'">
+    <meta th:if="${file.fileType == 'image'}" name="twitter:image" th:content="${file.cloudUrl}">
+
+    <!-- Apply saved theme before CSS to avoid flash -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('tlk-theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap.min.css(v=${v})}">
+    <link rel="stylesheet" th:href="@{/static/css/bootstrap-icons.css(v=${v})}">
+    <link rel="stylesheet" th:href="@{/static/style/common.css(v=${v})}">
+
+    <!-- JSON-LD Structured Data (DigitalDocument) -->
+    <script type="application/ld+json"
+            th:utext="'{&quot;@context&quot;:&quot;https://schema.org&quot;,&quot;@type&quot;:&quot;DigitalDocument&quot;,&quot;name&quot;:&quot;' + ${file.name} + '&quot;,&quot;description&quot;:&quot;Free download ' + ${file.name} + ' (' + ${file.sizeText} + ')&quot;,&quot;url&quot;:&quot;' + ${baseUrl} + '/file/' + ${file.uid} + '&quot;,&quot;encodingFormat&quot;:&quot;' + (${file.ext} ?: '') + '&quot;,&quot;contentSize&quot;:&quot;' + ${file.sizeText} + '&quot;,&quot;datePublished&quot;:&quot;' + ${file.createTimeText} + '&quot;,&quot;provider&quot;:{&quot;@type&quot;:&quot;Organization&quot;,&quot;name&quot;:&quot;TopLinks&quot;}}'">
+    </script>
+</head>
 <body class="d-flex flex-column min-vh-100">
 
 <nav th:replace="~{template :: navbar}"></nav>
@@ -112,7 +155,7 @@
 
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>
-<script th:if="${file.fileType == 'mobi'}" th:src="@{/static/js/mobi-reader.js}"></script>
+<script th:if="${file.fileType == 'mobi'}" th:src="@{/static/js/mobi-reader.js(v=${v})}"></script>
 <script th:if="${file.fileType == 'mobi'}">
     (function () {
         var container = document.getElementById('mobi-preview-container');
