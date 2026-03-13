@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/file/**", "/category/**", "/auth/**", "/static/**", "/error",
-                                 "/about", "/contact", "/privacy", "/terms").permitAll()
+                                 "/about", "/contact", "/privacy", "/terms", "/favicon.ico").permitAll()
                 .requestMatchers("/upload").authenticated()
                 .anyRequest().authenticated()
             )
