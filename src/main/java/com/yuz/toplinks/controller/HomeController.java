@@ -71,6 +71,12 @@ public class HomeController {
     	}
         model.addAttribute("selectedCategory", id);
 
+        // 查找分类名称用于页面标题
+        TlkCategory currentCategory = categoryService.getById(id);
+        if (currentCategory != null) {
+            model.addAttribute("pageTitle", currentCategory.getName());
+        }
+
         // Category-filtered view: paginated file list
         List<TlkFile> files = fileService.listByCategory(id, page, PAGE_SIZE);
         long total = fileService.countByCategory(id);
