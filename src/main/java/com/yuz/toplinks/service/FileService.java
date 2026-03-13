@@ -63,7 +63,7 @@ public class FileService {
         String hash = computeMd5(fileBytes);
         TlkFile existing = findByHash(hash);
         if (existing != null) {
-            throw new IOException("文件已存在，相同文件地址: /file/" + existing.getUid());
+            throw new IOException("File already exists: /file/" + existing.getUid());
         }
 
         String uid = generateUniqueUid();

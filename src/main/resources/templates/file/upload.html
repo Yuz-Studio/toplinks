@@ -22,10 +22,10 @@
 
                     <form th:action="@{/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
                         <div class="mb-4">
-                            <label for="file" class="form-label">Select File <span class="text-danger">*</span></label>
-                            <input type="file" id="file" name="file" class="form-control" required>
+                            <label for="file" class="form-label">Select Files <span class="text-danger">*</span></label>
+                            <input type="file" id="file" name="file" class="form-control" required multiple>
                             <div class="form-text">
-                                Supports PDF, images, audio, video, documents and more. Max 50 MB.
+                                Supports PDF, images, audio, video, documents and more. Max 50 MB per file. Can select multiple files.
                             </div>
                         </div>
 
@@ -45,16 +45,21 @@
 <script>
 document.getElementById('uploadForm').addEventListener('submit', function (e) {
     var fileInput = document.getElementById('file');
-    var maxSize = 50 * 1024 * 1024; // 50 MB
-    if (fileInput.files.length > 0 && fileInput.files[0].size > maxSize) {
+    var maxTotal = 50 * 1024 * 1024; // 50 MB
+    var totalSize = 0;
+    for (var i = 0; i < fileInput.files.length; i++) {
+        totalSize += fileInput.files[i].size;
+    }
+    if (totalSize > maxTotal) {
         e.preventDefault();
-        var sizeMB = (fileInput.files[0].size / 1024 / 1024).toFixed(1);
-        alert('文件大小 ' + sizeMB + ' MB，超过 50 MB 限制，无法上传');
+        var totalMB = (totalSize / 1024 / 1024).toFixed(1);
+        alert('Total file size ' + totalMB + ' MB exceeds the 50 MB limit');
         return;
     }
     var btn = document.getElementById('uploadBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading...';
+    var count = fileInput.files.length;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading ' + count + ' file' + (count > 1 ? 's' : '') + '...';
 });
 </script>
 </body>

@@ -50,33 +50,67 @@ public class FileController {
         return "file/upload";
     }
 
-    /** 处理文件上传 */
+    /** 处理文件上传（支持多文件） */
     @PostMapping("/upload")
     public String handleUpload(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("file") MultipartFile[] files,
             @RequestParam(value = "categoryId", required = false) String categoryId,
             Authentication authentication,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
-        if (file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
+        // Filter empty files
+        java.util.List<MultipartFile> validFiles = new java.util.ArrayList<>();
+        for (MultipartFile f : files) {
+            if (!f.isEmpty()) validFiles.add(f);
+        }
+        if (validFiles.isEmpty()) {
+            redirectAttributes.addFlashAttribute("message", "Please select at least one file to upload");
             redirectAttributes.addFlashAttribute("alertClass", "alert-warning");
             return "redirect:/upload";
         }
 
-        try {
-            String userId = resolveUserId(authentication);
-            TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
-            redirectAttributes.addFlashAttribute("message", "File uploaded successfully! URL: /file/" + tlkFile.getUid());
-            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
-            return "redirect:/file/" + tlkFile.getUid();
-        } catch (IOException e) {
-            logger.warning("File upload failed: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("message", "Upload failed: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
-            return "redirect:/upload";
+        String userId = resolveUserId(authentication);
+        java.util.List<String> successes = new java.util.ArrayList<>();
+        java.util.List<String> failures = new java.util.ArrayList<>();
+        TlkFile lastSuccess = null;
+
+        for (MultipartFile file : validFiles) {
+            try {
+                TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
+                successes.add(file.getOriginalFilename());
+                lastSuccess = tlkFile;
+            } catch (IOException e) {
+                logger.warning("File upload failed [" + file.getOriginalFilename() + "]: " + e.getMessage());
+                failures.add(file.getOriginalFilename() + " (" + e.getMessage() + ")");
+            }
         }
+
+        // Build result message
+        StringBuilder msg = new StringBuilder();
+        if (!successes.isEmpty()) {
+            msg.append("Successfully uploaded ").append(successes.size()).append(" file(s)");
+        }
+        if (!failures.isEmpty()) {
+            if (msg.length() > 0) msg.append("; ");
+            msg.append(failures.size()).append(" failed: ");
+            msg.append(String.join(", ", failures));
+        }
+
+        if (failures.isEmpty()) {
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+        } else if (successes.isEmpty()) {
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        } else {
+            redirectAttributes.addFlashAttribute("alertClass", "alert-warning");
+        }
+        redirectAttributes.addFlashAttribute("message", msg.toString());
+
+        // Single file uploaded successfully — redirect to detail page
+        if (validFiles.size() == 1 && lastSuccess != null) {
+            return "redirect:/file/" + lastSuccess.getUid();
+        }
+        return "redirect:/upload";
     }
 
     /** 文件详情页面（公开访问） */
