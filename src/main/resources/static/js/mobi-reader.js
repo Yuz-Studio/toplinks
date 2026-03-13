@@ -61,9 +61,11 @@
         var rec0 = offsets[0];
         var compression  = readUint16BE(bytes, rec0);       // 1=none, 2=PalmDOC, 17480=Huffman
         var textRecCount = readUint16BE(bytes, rec0 + 8);   // number of text records
+        var textRecSize  = readUint16BE(bytes, rec0 + 10);  // max size of a text record (usually 4096)
 
         // MOBI header starts 16 bytes into record 0
         var encoding = 'windows-1252';
+        var extraDataFlags = 0;
         if (rec0 + 32 <= bytes.length) {
             var mobiId = String.fromCharCode(bytes[rec0 + 16], bytes[rec0 + 17],
                                              bytes[rec0 + 18], bytes[rec0 + 19]);
@@ -71,6 +73,16 @@
                 var encCode = readUint32BE(bytes, rec0 + 28);
                 if (encCode === 65001) {
                     encoding = 'utf-8';
+                } else if (encCode === 1252) {
+                    encoding = 'windows-1252';
+                } else if (encCode === 936) {
+                    encoding = 'gbk';
+                }
+                
+                // Extra data flags at MOBI header + 0xF2 (offset 242 from start of record 0)
+                // MOBI header offset is 16, so 16 + 242 = 258
+                if (rec0 + 258 + 2 <= bytes.length) {
+                    extraDataFlags = readUint16BE(bytes, rec0 + 258);
                 }
             }
         }
@@ -85,11 +97,67 @@
             var start = offsets[r];
             var end   = offsets[r + 1];
             var record = bytes.slice(start, end);
+            
+            // Remove extra bytes from the end of the record
+            // MOBI files occasionally have 1-N bytes of extra data at the end of each text record.
+            if (extraDataFlags > 0) {
+                var extraSize = 0;
+                var flags = extraDataFlags;
+                // Multibyte (0x01): The last few bytes of the record may be part of a multibyte character.
+                // However, in standard MOBI, this bit actually indicates that there is 'trailing data' 
+                // and the last byte of the record (before other trailing data) tells you how many 
+                // bytes to ignore.
+                if (flags & 1) {
+                    var n = 0;
+                    var shift = 0;
+                    var lenSize = 0;
+                    // Read varlen integer from the end backwards
+                    for (var lastIdx = record.length - 1; lastIdx >= 0; lastIdx--) {
+                        var v = record[lastIdx];
+                        lenSize++;
+
+                        if (lastIdx === record.length - 1) {
+                            // The very last byte must have the high bit set to be a valid end of a varlen sequence
+                            if ((v & 0x80) === 0) {
+                                // Invalid trailing len structure (or not present), abort simple strip?
+                                // For safety, if we don't find the terminator, we might assume 0? 
+                                // But usually bit 0 flag implies it is there.
+                                // Let's try to proceed as if it's 0 if check fails, but usually it works.
+                                lenSize = 0; // Abort
+                                break;
+                            }
+                        }
+
+                        if (v & 0x80) {
+                            // High bit set. This is the end of a sequence (start of our backward read).
+                            // If this is not the first byte we read, it means we hit the END of the PREVIOUS sequence
+                            // (which is outside our scope), so we stop.
+                            if (lastIdx < record.length - 1) {
+                                lenSize--; // Don't include this byte
+                                break;
+                            }
+                        } else {
+                            // High bit clear. Continuation byte.
+                        }
+                        
+                        n |= (v & 0x7f) << shift;
+                        shift += 7;
+                    }
+                    // extraSize = data_length + length_of_size_field
+                    extraSize += n + lenSize;
+                }
+                
+                if (record.length > extraSize) {
+                    record = record.slice(0, record.length - extraSize);
+                }
+            }
+
             if (compression === 2) {
                 record = decompressPalmDOC(record);
             }
-            parts.push(decoder.decode(record));
+            parts.push(decoder.decode(record, { stream: true }));
         }
+        parts.push(decoder.decode()); // flush
 
         return parts.join('');
     }
