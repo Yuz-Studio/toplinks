@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${file.name} + ' - TopLinks'">文件分享</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/style/common.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-check-circle"></i> 分享文件</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i th:class="${file.iconClass} + ' display-1'"></i>
+                        </div>
+                        
+                        <h4 class="text-center mb-3" th:text="${file.name}">文件名</h4>
+                        
+                        <div class="row text-center mb-4">
+                            <div class="col-4">
+                                <p class="text-muted mb-0">文件大小</p>
+                                <strong th:text="${file.sizeText}">-</strong>
+                            </div>
+                            <div class="col-4">
+                                <p class="text-muted mb-0">文件类型</p>
+                                <strong th:text="${file.fileType}">-</strong>
+                            </div>
+                            <div class="col-4">
+                                <p class="text-muted mb-0">剩余次数</p>
+                                <strong th:text="${share.maxDownloads != null ? (share.maxDownloads - share.downloadCount) : '不限'}">-</strong>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${share.description}" class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle"></i>
+                            <span th:text="${share.description}"></span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/share/{token}/download(token=${share.shareToken})}" 
+                               class="btn btn-success btn-lg">
+                                <i class="bi bi-download"></i> 下载文件
+                            </a>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <p class="text-muted mb-0">
+                                <small>
+                                    <i class="bi bi-shield-check"></i> 
+                                    此分享受密码保护，下载次数有限制
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a th:href="@{/}" class="text-decoration-none">返回首页</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -48,6 +48,20 @@ public class TlkFile extends BaseEntity {
 	//Cloudflare R2 公开访问地址
 	private String cloudUrl;
 
+	//是否公开可见
+	private Boolean publicVisible;
+
+	/**
+	 * 获取公开链接
+	 */
+	@JsonIgnore
+	public String getPublicUrl() {
+		if (!Boolean.TRUE.equals(this.publicVisible)) {
+			return null;
+		}
+		return "/file/" + this.uid;
+	}
+
 	public static final Set<String> IMAGE_EXTS  = Set.of("jpg","jpeg","png","gif","webp","svg","bmp","ico");
 	public static final Set<String> VIDEO_EXTS  = Set.of("mp4","mkv","avi","mov","webm","flv");
 	public static final Set<String> AUDIO_EXTS  = Set.of("mp3","wav","ogg","flac","aac","m4a");

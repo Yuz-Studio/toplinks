@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分享已过期 - TopLinks</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap-icons.css}" rel="stylesheet">
+    <link th:href="@{/style/common.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0"><i class="bi bi-x-circle"></i> 分享已过期</h4>
+                    </div>
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-hourglass-split display-1 text-muted mb-4"></i>
+                        <h5>抱歉，此分享链接已失效</h5>
+                        <p class="text-muted">
+                            可能的原因：
+                        </p>
+                        <ul class="text-start text-muted">
+                            <li>分享已过期</li>
+                            <li>下载次数已达上限</li>
+                            <li>分享已被创建者删除</li>
+                        </ul>
+                        <a th:href="@{/}" class="btn btn-primary mt-3">
+                            <i class="bi bi-house"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
