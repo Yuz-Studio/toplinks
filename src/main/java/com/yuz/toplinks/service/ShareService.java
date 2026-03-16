@@ -12,19 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yuz.toplinks.dto.ShareCreateRequest;
 import com.yuz.toplinks.dto.ShareResponse;
 import com.yuz.toplinks.entity.TlkShare;
+import com.yuz.toplinks.entity.TlkShareAuditLog;
 import com.yuz.toplinks.mapper.TlkShareMapper;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ShareService {
     
     private final TlkShareMapper shareMapper;
     private final PasswordEncoder passwordEncoder;
-    
-    public ShareService(TlkShareMapper shareMapper, 
-                       PasswordEncoder passwordEncoder) {
-        this.shareMapper = shareMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final ShareAuditService auditService;
     
     /**
      * 创建分享链接
@@ -67,36 +66,75 @@ public class ShareService {
     }
     
     /**
-     * 验证分享密码
+     * 验证分享密码（带审计和 IP 限制）
      */
-    public boolean verifyPassword(String shareToken, String password) {
+    public PasswordVerifyResult verifyPassword(String shareToken, String password, String visitorIp) {
+        // 检查 IP 是否被限制
+        if (auditService.isIpRateLimited(visitorIp)) {
+            return PasswordVerifyResult.rateLimited(auditService.getFailedAttemptsByIp(visitorIp));
+        }
+        
         TlkShare share = shareMapper.findByToken(shareToken);
         if (share == null || !share.isValid()) {
-            return false;
+            return PasswordVerifyResult.invalid();
         }
         
         if (!Boolean.TRUE.equals(share.getRequirePassword())) {
-            return true;
+            return PasswordVerifyResult.ok();
         }
         
         if (share.getSharePassword() == null || password == null) {
-            return false;
+            auditService.logAccess(share.getId(), shareToken, visitorIp, 
+                TlkShareAuditLog.ACTION_PASSWORD_ATTEMPT, false, "Missing password", null);
+            return PasswordVerifyResult.failed("Password required");
         }
         
-        return passwordEncoder.matches(password, share.getSharePassword());
+        boolean matches = passwordEncoder.matches(password, share.getSharePassword());
+        if (!matches) {
+            auditService.logAccess(share.getId(), shareToken, visitorIp, 
+                TlkShareAuditLog.ACTION_PASSWORD_ATTEMPT, false, "Wrong password", null);
+            return PasswordVerifyResult.failed("Wrong password");
+        }
+        
+        auditService.logAccess(share.getId(), shareToken, visitorIp, 
+            TlkShareAuditLog.ACTION_PASSWORD_ATTEMPT, true, null, null);
+        return PasswordVerifyResult.ok();
     }
     
     /**
-     * 增加下载次数
+     * 密码验证结果
+     */
+    public static record PasswordVerifyResult(
+        boolean success,
+        boolean rateLimited,
+        int failedAttempts,
+        String message
+    ) {
+        public static PasswordVerifyResult ok() {
+            return new PasswordVerifyResult(true, false, 0, null);
+        }
+        
+        public static PasswordVerifyResult failed(String message) {
+            return new PasswordVerifyResult(false, false, 0, message);
+        }
+        
+        public static PasswordVerifyResult invalid() {
+            return new PasswordVerifyResult(false, false, 0, "Invalid or expired share");
+        }
+        
+        public static PasswordVerifyResult rateLimited(int failedAttempts) {
+            return new PasswordVerifyResult(false, true, failedAttempts, 
+                "Too many failed attempts. Please try again later.");
+        }
+    }
+    
+    /**
+     * 增加下载次数（原子操作，避免并发问题）
      */
     @Transactional
-    public void incrementDownloadCount(String shareToken) {
-        TlkShare share = shareMapper.findByToken(shareToken);
-        if (share != null && share.isValid()) {
-            share.setDownloadCount(share.getDownloadCount() + 1);
-            share.setUpdateTime(new Date());
-            shareMapper.updateById(share);
-        }
+    public boolean incrementDownloadCount(String shareToken) {
+        int updated = shareMapper.incrementDownloadCountAtomic(shareToken);
+        return updated > 0;
     }
     
     /**
@@ -155,35 +193,19 @@ public class ShareService {
     }
     
     /**
-     * 清理过期分享
+     * 清理过期分享（批量原子操作）
      */
     @Transactional
     public int cleanupExpiredShares() {
-        List<TlkShare> expired = shareMapper.findExpired();
-        for (TlkShare share : expired) {
-            share.setStatus(TlkShare.STATUS_INACTIVE);
-            share.setUpdateTime(new Date());
-        }
-        if (!expired.isEmpty()) {
-            expired.forEach(share -> shareMapper.updateById(share));
-        }
-        return expired.size();
+        return shareMapper.cleanupExpiredBatch();
     }
     
     /**
-     * 清理已达次数上限的分享
+     * 清理已达次数上限的分享（批量原子操作）
      */
     @Transactional
     public int cleanupMaxDownloadsReached() {
-        List<TlkShare> maxReached = shareMapper.findMaxDownloadsReached();
-        for (TlkShare share : maxReached) {
-            share.setStatus(TlkShare.STATUS_INACTIVE);
-            share.setUpdateTime(new Date());
-        }
-        if (!maxReached.isEmpty()) {
-            maxReached.forEach(share -> shareMapper.updateById(share));
-        }
-        return maxReached.size();
+        return shareMapper.cleanupMaxDownloadsBatch();
     }
     
     private ShareResponse toShareResponse(TlkShare share) {

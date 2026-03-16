@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yuz.toplinks.dto.ShareCreateRequest;
 import com.yuz.toplinks.dto.ShareResponse;
+import com.yuz.toplinks.entity.TlkShareAuditLog;
+import com.yuz.toplinks.mapper.TlkShareAuditLogMapper;
 import com.yuz.toplinks.service.ShareService;
 
 @RestController
@@ -25,9 +27,12 @@ import com.yuz.toplinks.service.ShareService;
 public class ShareApiController {
     
     private final ShareService shareService;
+    private final TlkShareAuditLogMapper auditLogMapper;
     
-    public ShareApiController(ShareService shareService) {
+    public ShareApiController(ShareService shareService,
+                             TlkShareAuditLogMapper auditLogMapper) {
         this.shareService = shareService;
+        this.auditLogMapper = auditLogMapper;
     }
     
     @PostMapping
@@ -130,5 +135,78 @@ public class ShareApiController {
             error.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
+    }
+    
+    /**
+     * 查看分享的审计日志（管理员或创建者）
+     */
+    @GetMapping("/{id}/audit")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> getAuditLog(
+            @PathVariable String id,
+            Principal principal) {
+        
+        String userId = principal.getName();
+        var share = shareService.findByToken(id);
+        
+        // 简单权限检查：只允许创建者查看
+        if (share != null && !userId.equals(share.getCreatedBy())) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "No permission");
+            return ResponseEntity.status(403).body(error);
+        }
+        
+        List<TlkShareAuditLog> logs = auditLogMapper.listByShareId(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", logs);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 获取分享统计信息
+     */
+    @GetMapping("/{id}/stats")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> getShareStats(
+            @PathVariable String id,
+            Principal principal) {
+        
+        String userId = principal.getName();
+        var share = shareService.findByToken(id);
+        
+        if (share != null && !userId.equals(share.getCreatedBy())) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "No permission");
+            return ResponseEntity.status(403).body(error);
+        }
+        
+        List<TlkShareAuditLog> logs = auditLogMapper.listByShareId(id);
+        
+        long viewCount = logs.stream()
+            .filter(log -> TlkShareAuditLog.ACTION_VIEW.equals(log.getActionType()))
+            .count();
+        long downloadCount = logs.stream()
+            .filter(log -> TlkShareAuditLog.ACTION_DOWNLOAD.equals(log.getActionType()))
+            .count();
+        long failedAttempts = logs.stream()
+            .filter(log -> Boolean.FALSE.equals(log.getSuccess()))
+            .count();
+        
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("viewCount", viewCount);
+        stats.put("downloadCount", downloadCount);
+        stats.put("failedAttempts", failedAttempts);
+        stats.put("currentDownloadCount", share != null ? share.getDownloadCount() : 0);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", stats);
+        
+        return ResponseEntity.ok(response);
     }
 }
