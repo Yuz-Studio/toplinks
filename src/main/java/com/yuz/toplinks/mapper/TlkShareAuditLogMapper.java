@@ -27,6 +27,6 @@ public interface TlkShareAuditLogMapper extends BaseMapper<TlkShareAuditLog> {
     /**
      * 统计指定 IP 最近的失败尝试次数
      */
-    @Select("SELECT COUNT(*) FROM TLK_SHARE_AUDIT_LOG WHERE visitor_ip = #{ip} AND success = false AND action_type = 'password_attempt' AND create_time > DATE_SUB(NOW(), INTERVAL 1 HOUR)")
+    @Select("SELECT COUNT(*) FROM TLK_SHARE_AUDIT_LOG WHERE visitor_ip = #{ip} AND is_success = false AND action_type = 'password_attempt' AND create_time > DATE_SUB(NOW(), INTERVAL 1 HOUR)")
     int countFailedAttemptsByIp(@Param("ip") String ip);
 }

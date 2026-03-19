@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `TLK_SHARE_AUDIT_LOG` (
     `share_token` VARCHAR(64) NOT NULL COMMENT '分享 Token',
     `visitor_ip` VARCHAR(45) COMMENT '访问者 IP',
     `action_type` VARCHAR(32) NOT NULL COMMENT '访问类型：view/download/password_attempt',
-    `success` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否成功',
+    `is_success` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否成功',
     `failure_reason` VARCHAR(255) COMMENT '失败原因',
     `user_agent` VARCHAR(512) COMMENT 'User-Agent',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

@@ -51,6 +51,12 @@ public class TlkFile extends BaseEntity {
 	//是否公开可见
 	private Boolean publicVisible;
 
+	// 是否加密
+	private Boolean encrypted;
+
+	// 加密密钥（加密存储）
+	private String encryptionKey;
+
 	/**
 	 * 获取公开链接
 	 */
@@ -60,6 +66,14 @@ public class TlkFile extends BaseEntity {
 			return null;
 		}
 		return "/file/" + this.uid;
+	}
+	
+	/**
+	 * 检查文件是否已加密
+	 */
+	@JsonIgnore
+	public boolean isEncrypted() {
+		return Boolean.TRUE.equals(this.encrypted);
 	}
 
 	public static final Set<String> IMAGE_EXTS  = Set.of("jpg","jpeg","png","gif","webp","svg","bmp","ico");

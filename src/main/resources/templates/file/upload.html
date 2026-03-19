@@ -29,6 +29,33 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="encryptToggle">
+                                <label class="form-check-label" for="encryptToggle">
+                                    <i class="bi bi-shield-lock"></i> Encrypt file
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Encrypt the file before uploading for extra security. You'll need the password to download.
+                            </div>
+                        </div>
+
+                        <div class="mb-4" id="passwordGroup" style="display: none;">
+                            <label for="password" class="form-label">Encryption Password</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter password to encrypt">
+                            <div class="form-text">
+                                This password will be required to download the file. Keep it safe!
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="categoryId" class="form-label">Category (Optional)</label>
+                            <select id="categoryId" name="categoryId" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary w-100" id="uploadBtn">
                             <i class="bi bi-cloud-upload"></i> Upload
                         </button>
@@ -43,6 +70,40 @@
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>
 <script>
+// Load categories
+fetch('/api/categories')
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && data.data) {
+            var select = document.getElementById('categoryId');
+            data.data.forEach(cat => {
+                var opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = (cat.icon ? '📁 ' : '') + cat.name;
+                select.appendChild(opt);
+            });
+        }
+    })
+    .catch(e => console.log('Failed to load categories', e));
+
+// Encryption toggle
+var encryptToggle = document.getElementById('encryptToggle');
+var passwordGroup = document.getElementById('passwordGroup');
+var passwordInput = document.getElementById('password');
+
+if (encryptToggle) {
+    encryptToggle.addEventListener('change', function() {
+        if (this.checked) {
+            passwordGroup.style.display = 'block';
+            passwordInput.required = true;
+        } else {
+            passwordGroup.style.display = 'none';
+            passwordInput.required = false;
+            passwordInput.value = '';
+        }
+    });
+}
+
 document.getElementById('uploadForm').addEventListener('submit', function (e) {
     var fileInput = document.getElementById('file');
     var maxTotal = 50 * 1024 * 1024; // 50 MB
@@ -56,6 +117,16 @@ document.getElementById('uploadForm').addEventListener('submit', function (e) {
         alert('Total file size ' + totalMB + ' MB exceeds the 50 MB limit');
         return;
     }
+    
+    // Add encrypt flag to form
+    if (encryptToggle && encryptToggle.checked) {
+        var encryptInput = document.createElement('input');
+        encryptInput.type = 'hidden';
+        encryptInput.name = 'encrypt';
+        encryptInput.value = 'true';
+        this.appendChild(encryptInput);
+    }
+    
     var btn = document.getElementById('uploadBtn');
     btn.disabled = true;
     var count = fileInput.files.length;

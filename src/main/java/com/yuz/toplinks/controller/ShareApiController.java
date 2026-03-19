@@ -194,7 +194,7 @@ public class ShareApiController {
             .filter(log -> TlkShareAuditLog.ACTION_DOWNLOAD.equals(log.getActionType()))
             .count();
         long failedAttempts = logs.stream()
-            .filter(log -> Boolean.FALSE.equals(log.getSuccess()))
+            .filter(log -> Boolean.FALSE.equals(log.getIsSuccess()))
             .count();
         
         Map<String, Object> stats = new HashMap<>();

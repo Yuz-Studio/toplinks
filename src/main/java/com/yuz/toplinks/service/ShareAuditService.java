@@ -27,16 +27,15 @@ public class ShareAuditService {
     public void logAccess(String shareId, String shareToken, String visitorIp, 
                          String actionType, boolean success, String failureReason, 
                          String userAgent) {
-        TlkShareAuditLog log = TlkShareAuditLog.builder()
-            .shareId(shareId)
-            .shareToken(shareToken)
-            .visitorIp(visitorIp)
-            .actionType(actionType)
-            .success(success)
-            .failureReason(failureReason)
-            .userAgent(userAgent)
-            .createTime(new Date())
-            .build();
+        TlkShareAuditLog log = new TlkShareAuditLog();
+        log.setShareId(shareId);
+        log.setShareToken(shareToken);
+        log.setVisitorIp(visitorIp);
+        log.setActionType(actionType);
+        log.setIsSuccess(success);
+        log.setFailureReason(failureReason);
+        log.setUserAgent(userAgent);
+        log.setCreateTime(new Date());
         auditLogMapper.insert(log);
     }
     

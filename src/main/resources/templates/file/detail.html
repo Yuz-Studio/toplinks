@@ -62,14 +62,26 @@
 
             <div class="card shadow-sm">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0 text-truncate" th:text="${file.name}"></h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <i th:if="${file.encrypted}" class="bi bi-shield-lock text-warning" title="Encrypted file"></i>
+                        <h5 class="mb-0 text-truncate" th:text="${file.name}"></h5>
+                    </div>
                     <a th:href="@{/file/{uid}/download(uid=${file.uid})}"
-                       class="btn btn-sm btn-primary ms-2 flex-shrink-0">
+                       class="btn btn-sm btn-primary ms-2 flex-shrink-0" id="downloadBtn">
                         <i class="bi bi-download"></i> Download
                     </a>
                 </div>
 
                 <div class="card-body">
+
+                    <!-- 加密文件提示 -->
+                    <div th:if="${file.encrypted}" class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-shield-lock me-2 fs-5"></i>
+                        <div class="flex-grow-1">
+                            <strong>This file is encrypted.</strong> 
+                            <span class="ms-2">Please enter the password to download.</span>
+                        </div>
+                    </div>
 
                     <!-- 文件信息 -->
                     <div class="row text-muted small mb-3">
@@ -153,6 +165,32 @@
     </div>
 </main>
 
+<!-- Password Modal for Encrypted Files -->
+<div th:if="${file.encrypted}" class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">
+                    <i class="bi bi-shield-lock text-warning me-2"></i>Enter Password
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">This file is encrypted. Please enter the password to download.</p>
+                <input type="password" id="filePassword" class="form-control" placeholder="Enter password" autofocus>
+                <div id="passwordError" class="alert alert-danger mt-2" style="display: none;">
+                    <i class="bi bi-exclamation-triangle"></i> Wrong password. Please try again.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmDownloadBtn">
+                    <i class="bi bi-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer th:replace="~{template :: footer}"></footer>
 <div th:replace="~{template :: scripts}"></div>
 <script th:if="${file.fileType == 'mobi'}" th:src="@{/static/js/mobi-reader.js(v=${v})}"></script>
@@ -162,6 +200,50 @@
         if (container && typeof MobiReader !== 'undefined') {
             MobiReader.preview('/file/' + container.dataset.uid + '/raw', container);
         }
+    })();
+</script>
+<script th:if="${file.encrypted}">
+    (function () {
+        var downloadBtn = document.getElementById('downloadBtn');
+        var passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+        var confirmBtn = document.getElementById('confirmDownloadBtn');
+        var passwordInput = document.getElementById('filePassword');
+        var errorDiv = document.getElementById('passwordError');
+        var fileUid = '[[${file.uid}]]';
+        
+        // Show password modal when clicking download
+        downloadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            errorDiv.style.display = 'none';
+            passwordInput.value = '';
+            passwordModal.show();
+            passwordInput.focus();
+        });
+        
+        // Handle confirm download
+        confirmBtn.addEventListener('click', function() {
+            var password = passwordInput.value.trim();
+            if (!password) {
+                passwordInput.focus();
+                return;
+            }
+            
+            // Try to download with password
+            var downloadUrl = '/file/' + fileUid + '/download?password=' + encodeURIComponent(password);
+            window.location.href = downloadUrl;
+            
+            // Hide modal after short delay (user can check if download started)
+            setTimeout(function() {
+                passwordModal.hide();
+            }, 500);
+        });
+        
+        // Enter key to submit
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmBtn.click();
+            }
+        });
     })();
 </script>
 </body>

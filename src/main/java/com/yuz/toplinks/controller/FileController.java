@@ -55,6 +55,8 @@ public class FileController {
     public String handleUpload(
             @RequestParam("file") MultipartFile[] files,
             @RequestParam(value = "categoryId", required = false) String categoryId,
+            @RequestParam(value = "encrypt", defaultValue = "false") boolean encrypt,
+            @RequestParam(value = "password", required = false) String password,
             Authentication authentication,
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
@@ -77,7 +79,7 @@ public class FileController {
 
         for (MultipartFile file : validFiles) {
             try {
-                TlkFile tlkFile = fileService.upload(file, userId, categoryId, request);
+                TlkFile tlkFile = fileService.upload(file, userId, categoryId, request, encrypt, password);
                 successes.add(file.getOriginalFilename());
                 lastSuccess = tlkFile;
             } catch (IOException e) {
@@ -134,11 +136,46 @@ public class FileController {
     @GetMapping("/file/{uid}/download")
     @org.springframework.web.bind.annotation.ResponseBody
     public ResponseEntity<org.springframework.core.io.Resource> downloadFile(
-            @PathVariable String uid) {
+            @PathVariable String uid,
+            @RequestParam(value = "password", required = false) String password) {
         TlkFile file = fileService.findByUid(uid);
         if (file == null || file.getPath() == null) {
             return ResponseEntity.notFound().build();
         }
+        
+        // 检查文件是否加密
+        if (file.isEncrypted()) {
+            if (password == null || password.isBlank()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null);
+            }
+            // 解密文件
+            try {
+                java.io.InputStream inputStream = cloudflareStorageService.getInputStream(file.getPath());
+                byte[] encryptedData = inputStream.readAllBytes();
+                byte[] decryptedData = FileService.decryptFile(encryptedData, password);
+                
+                String fileName = file.getName() != null ? file.getName() : file.getUid();
+                String disposition = org.springframework.http.ContentDisposition.attachment()
+                        .filename(fileName, java.nio.charset.StandardCharsets.UTF_8)
+                        .build().toString();
+                org.springframework.http.MediaType contentType =
+                        org.springframework.http.MediaTypeFactory.getMediaType(fileName)
+                                .orElse(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+                
+                org.springframework.core.io.Resource resource =
+                        new org.springframework.core.io.ByteArrayResource(decryptedData);
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                        .contentType(contentType)
+                        .contentLength(decryptedData.length)
+                        .body(resource);
+            } catch (java.io.IOException e) {
+                logger.warning("File decrypt failed for uid=" + uid + ": " + e.getMessage());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+        
         try {
             String fileName = file.getName() != null ? file.getName() : file.getUid();
             String disposition = org.springframework.http.ContentDisposition.attachment()

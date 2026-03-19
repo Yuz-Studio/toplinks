@@ -41,7 +41,7 @@ public class FileService {
     }
 
     /**
-     * 上传文件并保存记录到数据库。
+     * 上传文件并保存记录到数据库（不支持加密）。
      *
      * @param file       上传的 MultipartFile
      * @param userId     当前用户 ID
@@ -50,6 +50,22 @@ public class FileService {
      * @return 保存的 TlkFile 实体
      */
     public TlkFile upload(MultipartFile file, String userId, String categoryId, HttpServletRequest request) throws IOException {
+        return upload(file, userId, categoryId, request, false, null);
+    }
+    
+    /**
+     * 上传文件并保存记录到数据库（支持加密）。
+     *
+     * @param file       上传的 MultipartFile
+     * @param userId     当前用户 ID
+     * @param categoryId 所属分类 ID（可为 null）
+     * @param request    HTTP 请求（用于获取 IP）
+     * @param encrypt    是否加密
+     * @param password   加密密码（encrypt=true 时必需）
+     * @return 保存的 TlkFile 实体
+     */
+    public TlkFile upload(MultipartFile file, String userId, String categoryId, HttpServletRequest request, 
+                         boolean encrypt, String password) throws IOException {
         String originalName = file.getOriginalFilename();
         if (originalName == null || originalName.isBlank()) {
             throw new IOException("File name cannot be empty");
@@ -66,6 +82,15 @@ public class FileService {
             throw new IOException("File already exists: /file/" + existing.getUid());
         }
 
+        // 加密处理（如果需要）
+        byte[] uploadBytes = fileBytes;
+        String encryptionKey = null;
+        if (encrypt && password != null && !password.isBlank()) {
+            EncryptionResult result = encryptFile(fileBytes, password);
+            uploadBytes = result.encryptedData;
+            encryptionKey = result.keyId;
+        }
+
         String uid = generateUniqueUid();
         String objectKey = "files/" + uid + (ext.isEmpty() ? "" : "." + ext);
 
@@ -73,7 +98,7 @@ public class FileService {
                 .map(MediaType::toString)
                 .orElse("application/octet-stream");
 
-        String cloudUrl = storageService.upload(objectKey, new java.io.ByteArrayInputStream(fileBytes), file.getSize(), contentType);
+        String cloudUrl = storageService.upload(objectKey, new java.io.ByteArrayInputStream(uploadBytes), uploadBytes.length, contentType);
 
         String ip = getClientIp(request);
 
@@ -92,6 +117,8 @@ public class FileService {
         tlkFile.setCreateIp(ip);
         tlkFile.setStatus(BaseEntity.STATUS_ACTIVE);
         tlkFile.setCreateTime(new Date());
+        tlkFile.setEncrypted(encrypt && encryptionKey != null);
+        tlkFile.setEncryptionKey(encryptionKey);
 
         fileMapper.insert(tlkFile);
         return tlkFile;
@@ -240,5 +267,82 @@ public class FileService {
             case "mobi"     -> "bi-book";
             default         -> "bi-file-earmark";
         };
+    }
+    
+    /**
+     * 加密结果记录
+     */
+    private static record EncryptionResult(byte[] encryptedData, String keyId) {}
+    
+    /**
+     * 加密文件数据（使用 AES-256）
+     */
+    private static EncryptionResult encryptFile(byte[] data, String password) throws IOException {
+        try {
+            // 生成盐值和 IV
+            byte[] salt = new byte[16];
+            byte[] iv = new byte[16];
+            java.security.SecureRandom random = new java.security.SecureRandom();
+            random.nextBytes(salt);
+            random.nextBytes(iv);
+            
+            // 从密码派生密钥
+            javax.crypto.spec.PBEKeySpec keySpec = new javax.crypto.spec.PBEKeySpec(password.toCharArray(), salt, 65536, 256);
+            javax.crypto.SecretKeyFactory keyFactory = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            byte[] keyBytes = keyFactory.generateSecret(keySpec).getEncoded();
+            
+            // AES 加密
+            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
+            javax.crypto.spec.IvParameterSpec ivSpec = new javax.crypto.spec.IvParameterSpec(iv);
+            javax.crypto.spec.SecretKeySpec keySpec2 = new javax.crypto.spec.SecretKeySpec(keyBytes, "AES");
+            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, keySpec2, ivSpec);
+            byte[] encrypted = cipher.doFinal(data);
+            
+            // 生成密钥 ID（用于标识这个加密配置）
+            String keyId = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+            
+            // 组合：salt(16) + iv(16) + encrypted data
+            byte[] result = new byte[16 + 16 + encrypted.length];
+            System.arraycopy(salt, 0, result, 0, 16);
+            System.arraycopy(iv, 0, result, 16, 16);
+            System.arraycopy(encrypted, 0, result, 32, encrypted.length);
+            
+            return new EncryptionResult(result, keyId);
+        } catch (Exception e) {
+            throw new IOException("Failed to encrypt file: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 解密文件数据
+     */
+    public static byte[] decryptFile(byte[] encryptedData, String password) throws IOException {
+        try {
+            if (encryptedData.length < 32) {
+                throw new IOException("Invalid encrypted data");
+            }
+            
+            // 提取 salt 和 iv
+            byte[] salt = new byte[16];
+            byte[] iv = new byte[16];
+            System.arraycopy(encryptedData, 0, salt, 0, 16);
+            System.arraycopy(encryptedData, 16, iv, 0, 16);
+            byte[] encrypted = new byte[encryptedData.length - 32];
+            System.arraycopy(encryptedData, 32, encrypted, 0, encrypted.length);
+            
+            // 从密码派生密钥
+            javax.crypto.spec.PBEKeySpec keySpec = new javax.crypto.spec.PBEKeySpec(password.toCharArray(), salt, 65536, 256);
+            javax.crypto.SecretKeyFactory keyFactory = javax.crypto.SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            byte[] keyBytes = keyFactory.generateSecret(keySpec).getEncoded();
+            
+            // AES 解密
+            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding");
+            javax.crypto.spec.IvParameterSpec ivSpec = new javax.crypto.spec.IvParameterSpec(iv);
+            javax.crypto.spec.SecretKeySpec keySpec2 = new javax.crypto.spec.SecretKeySpec(keyBytes, "AES");
+            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec2, ivSpec);
+            return cipher.doFinal(encrypted);
+        } catch (Exception e) {
+            throw new IOException("Failed to decrypt file: " + e.getMessage(), e);
+        }
     }
 }

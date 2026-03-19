@@ -1,8 +1,11 @@
 package com.yuz.toplinks.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +19,36 @@ import com.yuz.toplinks.service.FileService;
 
 @Controller
 public class HomeController {
-
+    
     private final CategoryService categoryService;
     private final FileService fileService;
 
     public HomeController(CategoryService categoryService, FileService fileService) {
         this.categoryService = categoryService;
         this.fileService = fileService;
+    }
+    
+    /**
+     * 获取所有分类（API）
+     */
+    @GetMapping("/api/categories")
+    public ResponseEntity<Map<String, Object>> listCategories() {
+        List<TlkCategory> categories = categoryService.listActiveCategories();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (TlkCategory cat : categories) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", cat.getId());
+            item.put("name", cat.getName());
+            item.put("icon", cat.getIcon());
+            item.put("sortOrder", cat.getSortOrder());
+            result.add(item);
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", result);
+        
+        return ResponseEntity.ok(response);
     }
 
     private static final int PAGE_SIZE = FileService.DEFAULT_PAGE_SIZE;

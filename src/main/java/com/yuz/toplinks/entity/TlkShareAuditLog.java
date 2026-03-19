@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 分享访问审计日志
@@ -16,6 +18,8 @@ import lombok.Data;
 @TableName("TLK_SHARE_AUDIT_LOG")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TlkShareAuditLog {
 
     @TableId(type = IdType.ASSIGN_UUID)
@@ -34,7 +38,7 @@ public class TlkShareAuditLog {
     private String actionType;
     
     /** 是否成功 */
-    private Boolean success;
+    private Boolean isSuccess;
     
     /** 失败原因 */
     private String failureReason;
@@ -44,6 +48,10 @@ public class TlkShareAuditLog {
     
     /** 创建时间 */
     private Date createTime;
+    
+    // Explicit getters/setters for Lombok compatibility
+    public Boolean getIsSuccess() { return isSuccess; }
+    public void setIsSuccess(Boolean isSuccess) { this.isSuccess = isSuccess; }
     
     public static final String ACTION_VIEW = "view";
     public static final String ACTION_DOWNLOAD = "download";
