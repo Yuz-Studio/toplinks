@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yuz.toplinks.entity.TlkFile;
 import com.yuz.toplinks.entity.TlkShare;
+import com.yuz.toplinks.service.CloudflareStorageService;
 import com.yuz.toplinks.service.FileService;
 import com.yuz.toplinks.service.ShareService;
-import com.yuz.toplinks.service.CloudflareStorageService;
 
 @Controller
 @RequestMapping("/share")
